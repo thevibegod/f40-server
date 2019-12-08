@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [{ "src": "index.js", "use": "@now/node-server" }],
+  "routes": [
+    {
+      "src": "/createuser",
+      "dest": "/index.js",
+      "methods": ["POST","GET"]
+    },
+    {
+      "src": "/validateuser",
+      "dest": "/index.js",
+      "methods": ["POST"]
+    },
+    {
+      "src": "/user",
+      "dest": "/index.js",
+      "methods": ["PUT","DELETE"]
+    },{
+      "src": "/studentprofilepicture",
+      "dest": "/index.js",
+      "methods": ["GET"]
+    },
+    {
+      "src": "/studentprofiledetails",
+      "dest": "/index.js",
+      "methods": ["GET"]
+    }
+  ]
+}
