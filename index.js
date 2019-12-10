@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const profileRouter = require("./routes/profiles");
 const userRouter = require("./routes/user");
+var eventRouter = require("./routes/events");
 const auth = require("./auth/auth");
 const app = express();
 
@@ -41,6 +42,7 @@ app.post("/validateuser", (req, res) => {
 
 app.use(auth.validateMiddleware);
 app.use(userRouter);
+app.use(eventRouter);
 app.use(profileRouter);
 app.get("/", function(req, res) {
   res.send("GET Login/Home page");

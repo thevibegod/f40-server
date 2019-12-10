@@ -47,4 +47,10 @@ router.put("/user", (req, res) => {
   });
 });
 
+//router.get('/getall',(req,res)=>{
+//  UserSchema.find({}).then(function (users){
+//    res.send(users);
+//  })
+//})
+
 module.exports = router;
