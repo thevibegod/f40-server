@@ -1,7 +1,7 @@
 var express = require('express');
 var cors= require('cors')
 var bodyParser = require('body-parser');
-
+var eventRouter = require('./routes/events')
 var profileRouter = require('./routes/profiles')
 var userRouter = require('./routes/user')
 var app = express();
@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 connectDB();
 app.set('view engine','ejs')
-
+app.use(eventRouter)
 app.use(profileRouter)
 app.use(userRouter)
 app.get('/', function(req, res){
