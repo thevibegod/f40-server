@@ -90,4 +90,10 @@ router.get('/eventpicture',(req,res)=>{
           const newEvent = new eventSchema({title:req.body.title,id:req.file.id,desc:req.body.desc})
           newEvent.save()}).then(()=>res.status(201).send('Updated Event in db')).catch((err)=>res.json(err))
     })
+
+    router.get('/getallevents',(req,res)=>{
+      eventSchema.find({}).then(function (events){
+        res.json(events);
+      })
+    })
 module.exports=router;

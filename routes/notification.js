@@ -53,4 +53,10 @@ router.post('/addnotification',(req, res)=>{
           const newEvent = new notificationSchema({title:req.body.title,id:req.file.id,desc:req.body.desc})
           newEvent.save()}).then(()=>res.status(201).send('Updated notification in db')).catch((err)=>res.json(err))
     })
+
+    router.get('/getallnotifications',(req,res)=>{
+      eventSchema.find({}).then(function (notifications){
+        res.json(notifications);
+      })
+    })
 module.exports=router;
