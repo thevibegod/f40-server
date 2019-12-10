@@ -46,4 +46,10 @@ router.put('/user',(req,res)=>{
   testUser.save().then(res.status(201).send("User Updated"));})
 })
 
+//router.get('/getall',(req,res)=>{
+//  UserSchema.find({}).then(function (users){
+//    res.send(users);
+//  })
+//})
+
 module.exports = router;
