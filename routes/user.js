@@ -9,10 +9,13 @@ mongoose.connect(connStr, function(err) {
 });
 
 router.get("/createuser", (req, res) => {
-  res.render("user");
+  if (req.loggedInUser.username === "admin") res.render("user");
+  else res.status(403).send("No permission to access this page");
 });
 
 router.post("/createuser", (req, res) => {
+  if (req.loggedInUser.username !== "admin")
+    return res.status(403).send("No permission to access this page");
   const testUser = new UserSchema({
     username: req.body.username,
     password: req.body.password
@@ -26,6 +29,8 @@ router.post("/createuser", (req, res) => {
 });
 
 router.delete("/user", (req, res) => {
+  if (req.loggedInUser.username !== "admin")
+    return res.status(403).send("No permission to access this page");
   if (!req.query.username) {
     res.status(400).send("Bad Request");
   }
@@ -46,7 +51,5 @@ router.put("/user", (req, res) => {
     testUser.save().then(res.status(201).send("User Updated"));
   });
 });
-
-
 
 module.exports = router;
