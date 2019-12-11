@@ -18,9 +18,9 @@ router.get('/updatecourse',function(req, res){
 });
 
 router.post('/addcourse',(req, res)=>{
-  const newcourse = new eventcourse({title:req.body.title,desc:req.body.desc,
-  price:req.body.price,financialaid:req.body.financialaid})
-  newEvent.save().then(()=>res.status(201).send('Added course to db')).catch((err)=>res.json(err))
+  const newcourse = new courseSchema({title:req.body.title,desc:req.body.desc,
+  price:req.body.price,financialaid:req.body.financialaid,link:req.body.link})
+  newcourse.save().then(()=>res.status(201).send('Added course to db')).catch((err)=>res.json(err))
 });
 
 
@@ -38,9 +38,7 @@ router.post('/addcourse',(req, res)=>{
       if(!req.query.title){
         return res.status(400).send("Bad Request.")
       }
-      coursenotification.findOneAndDelete({title:req.query.title}).then(data=>{
-        gfs.remove({_id:data.id,root:'uploads'})
-      }).then(res.status(200).send("course removed from db"))
+      courseSchema.findOneAndDelete({title:req.query.title}).then(res.status(200).send("course removed from db"))
       })
 
 
@@ -49,10 +47,9 @@ router.post('/addcourse',(req, res)=>{
       if(!req.body.rollNo){
         return res.status(400).send("Bad Request.")
       }
-      courseSchema.findOneAndDelete({title:req.body.title}).then(data=>{
-        gfs.remove({_id:data.id,root:'uploads'});}).then(()=>{
+      courseSchema.findOneAndDelete({title:req.body.title}).then(()=>{
           const newEvent = new courseSchema({title:req.body.title,desc:req.body.desc,
-          price:req.body.price,financialaid:req.body.financialaid})
+          price:req.body.price,financialaid:req.body.financialaid,link:req.body.link})
           newEvent.save()}).then(()=>res.status(201).send('Updated course in db')).catch((err)=>res.json(err))
     })
 
