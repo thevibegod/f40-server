@@ -11,6 +11,11 @@ var courseSchema = new mongoose.Schema({
   financialaid :{
     type:String,
     required: true
+  },
+  link:{
+    type:String,
+    required:true,
+    unique:true
   }
 })
 

@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var mongoose = require('mongoose')
-var notificationSchema = require('../models/courseSchema')
+var courseSchema = require('../models/courseSchema')
 
 var connStr = "mongodb+srv://adarsh18bec095:Adarsh123@f40cluster-wugpz.mongodb.net/test?retryWrites=true&w=majority";
 mongoose.connect(connStr, function(err) {
@@ -44,16 +44,16 @@ router.post('/addcourse',(req, res)=>{
 
 
     router.post('/courseupdation',(req,res)=>{
-      if(!req.body.rollNo){
+      if(!req.body.title){
         return res.status(400).send("Bad Request.")
       }
       courseSchema.findOneAndDelete({title:req.body.title}).then(()=>{
-          const newEvent = new courseSchema({title:req.body.title,desc:req.body.desc,
+          const newcourse = new courseSchema({title:req.body.title,desc:req.body.desc,
           price:req.body.price,financialaid:req.body.financialaid,link:req.body.link})
-          newEvent.save()}).then(()=>res.status(201).send('Updated course in db')).catch((err)=>res.json(err))
+          newcourse.save()}).then(()=>res.status(201).send('Updated course in db')).catch((err)=>res.json(err))
     })
 
-    router.get('/getallcourse',(req,res)=>{
+    router.get('/getallcourses',(req,res)=>{
       courseSchema.find({}).then(function (course){
         res.json(course);
       })
