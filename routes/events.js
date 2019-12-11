@@ -82,7 +82,7 @@ router.get('/eventpicture',(req,res)=>{
 
 
     router.post('/eventupdation',upload.single('picture'),(req,res)=>{
-      if(!req.body.rollNo){
+      if(!req.body.title){
         return res.status(400).send("Bad Request.")
       }
       eventSchema.findOneAndDelete({title:req.body.title}).then(data=>{

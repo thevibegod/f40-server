@@ -3,6 +3,8 @@ const bodyParser = require("body-parser");
 const profileRouter = require("./routes/profiles");
 const userRouter = require("./routes/user");
 var eventRouter = require("./routes/events");
+var notificationRouter = require("./routes/notification")
+var courseRouter = require("./routes/course")
 const auth = require("./auth/auth");
 const app = express();
 
@@ -44,6 +46,9 @@ app.use(auth.validateMiddleware);
 app.use(userRouter);
 app.use(eventRouter);
 app.use(profileRouter);
+app.use(notificationRouter);
+app.use(courseRouter);
+
 app.get("/", function(req, res) {
   res.send("GET Login/Home page");
 });

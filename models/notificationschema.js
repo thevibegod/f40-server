@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
  Schema=mongoose.Schema;
-var notificationSchema=new mongoose.UserSchema
+var notificationSchema=new mongoose.Schema(
 {
   title :{
     type:String,
@@ -12,5 +12,5 @@ var notificationSchema=new mongoose.UserSchema
     type:String,
     required:true,
   },
-}
+})
  module.exports = mongoose.model('Notification', notificationSchema);
