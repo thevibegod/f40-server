@@ -25,6 +25,26 @@
       "src": "/studentprofiledetails",
       "dest": "/index.js",
       "methods": ["GET"]
-    }
+    },
+    {
+      "src": "/getallevents",
+      "dest": "/index.js",
+      "methods": ["GET"]
+    },
+    {
+      "src": "/eventpicture",
+      "dest": "/index.js",
+      "methods": ["GET"]
+    },
+    {
+      "src": "/getallnotifications",
+    "dest": "/index.js",
+    "methods": ["GET"]
+  },
+  {
+    "src": "/getallcourses",
+    "dest": "/index.js",
+    "methods": ["GET"]
+  }
   ]
 }
