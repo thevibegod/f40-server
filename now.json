@@ -45,6 +45,16 @@
     "src": "/getallcourses",
     "dest": "/index.js",
     "methods": ["GET"]
+  },
+  {
+    "src": "/addachievement",
+    "dest": "/index.js",
+    "methods": ["POST"]
+  },
+  {
+    "src": "/removeachievement",
+    "dest": "/index.js",
+    "methods": ["POST"]
   }
   ]
 }

@@ -27,6 +27,9 @@ let profileSchema = new Schema({
   attendance:{
     type: Number,
     required: true
+  },
+  achievements:{
+    type: [String]
   }
 });
 
