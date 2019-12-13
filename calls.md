@@ -1,6 +1,6 @@
 # Users Calls:
 
-## POST /validateuser
+* ## POST /validateuser
 
 ### request (body):
 
@@ -19,7 +19,7 @@ token: <token string>
 
 ---
 
-## GET /createuser
+* ## GET /createuser
 
 ### request :
 
@@ -29,7 +29,9 @@ X-Access-Token
 
 form
 
-## POST /createuser
+---
+
+* ## POST /createuser
 
 ### request (body):
 
@@ -49,7 +51,7 @@ msg: <string>
 
 ---
 
-## DELETE /user
+* ## DELETE /user
 
 ### request :
 
@@ -68,7 +70,7 @@ msg: <string>
 
 ---
 
-## PUT /user
+* ## PUT /user
 
 ### request :
 
@@ -82,6 +84,139 @@ username,
 {
 success: <boolean>,
 msg: <string>
+}
+```
+
+---
+
+# Profile Calls
+* ## GET /addprofile
+### request :
+X-Access-Token
+### response :
+form
+
+---
+
+* ## GET /updateprofile
+### request :
+X-Access-Token
+### response :
+form
+
+---
+
+* ## POST /addprofile
+### request (body):
+X-Access-Token
+
+name,
+batch,
+attendance,
+mentorName,
+rollNo
+id(file)
+
+### response :
+```
+{
+  success: <boolean>,
+  msg:  <string>
+}
+```
+
+---
+
+* ## GET /studentprofilepicture
+### request (body):
+X-Access-Token
+
+rollNo
+
+### response :
+```
+{
+  success: false,
+  msg:  <string>
+}
+
+<or>
+
+image
+```
+
+---
+
+* ## GET /studentprofiledetails
+### request (body):
+X-Access-Token
+
+rollNo
+
+### response :
+```
+{
+  success: <boolean>,
+  msg:  <string>
+}
+```
+or
+```
+{
+  name : <string>
+  id : <ObjectID>
+  rollNo :<string>
+  batch: <string>
+  mentorName:<string>
+  attendance:<Number>
+}
+```
+
+---
+
+
+* ## GET /removestudentprofiledetails
+### request (body):
+X-Access-Token
+
+rollNo
+
+### response :
+```
+{
+  success: <boolean>,
+  msg:  <string>
+}
+```
+
+---
+
+* ## POST /studentprofiledetailsupdation
+### request (body):
+X-Access-Token
+```
+{
+  name : <string>
+  id : <ObjectID>
+  rollNo :<string>
+  batch: <string>
+  mentorName:<string>
+  attendance:<Number>
+}
+```
+
+### response :
+```
+{
+  success: <boolean>,
+  msg:  <string>
+}
+```
+or
+```
+{
+  success: <boolean>,
+  err: <object>
 }
 ```
 
