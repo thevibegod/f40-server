@@ -64,9 +64,59 @@ router.post("/addprofile", upload.single("picture"), (req, res) => {
     .catch(err => res.json({ sucess: false, err }));
 });
 
+router.post("/addachievement", (req, res) => {
+  if (!req.query.rollNo) {
+    return res.status(400).send("Bad Request.");
+  }
+  profileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
+    profileSchema
+      .findOneAndDelete({ rollNo: req.query.rollNo })
+      .then(() => {
+        data.achievements.push(req.body.achievement);
+        const prof = new profileSchema({
+          name: data.name,
+          id: data.id,
+          batch: data.batch,
+          attendance: data.attendance,
+          mentorName: data.mentorName,
+          rollNo: data.rollNo,
+          achievements: data.achievements
+        });
+        prof.save();
+      })
+      .then(() => res.status(200).send("Updated Profile"))
+      .catch(err => res.json(err));
+  });
+});
+
+router.post("/removeachievement", (req, res) => {
+  if (!req.query.rollNo || !req.body.id) {
+    return res.status(400).send("Bad Request.");
+  }
+  profileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
+    profileSchema
+      .findOneAndDelete({ rollNo: req.query.rollNo })
+      .then(() => {
+        data.achievements.splice(req.body.id, 1);
+        const prof = new profileSchema({
+          name: data.name,
+          id: data.id,
+          batch: data.batch,
+          attendance: data.attendance,
+          mentorName: data.mentorName,
+          rollNo: data.rollNo,
+          achievements: data.achievements
+        });
+        prof.save();
+      })
+      .then(() => res.status(200).send("Updated Profile"))
+      .catch(err => res.json(err));
+  });
+});
+
 router.get("/studentprofilepicture", (req, res) => {
   if (!req.query.rollNo) {
-    return res.status(400).json({ success: false, msg: "Bad Request." });
+    return res.status(400).send("Bad Request.");
   }
   profileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
     gfs.files.findOne({ _id: data.id }, (err, file) => {
