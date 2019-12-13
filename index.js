@@ -6,7 +6,7 @@ const userRouter = require("./routes/user");
 var eventRouter = require("./routes/events");
 var notificationRouter = require("./routes/notification");
 var courseRouter = require("./routes/course");
-var achievementRouter = require("./routes/achievements");
+
 
 const auth = require("./auth/auth");
 const app = express();
@@ -63,7 +63,7 @@ app.use(eventRouter);
 app.use(profileRouter);
 app.use(notificationRouter);
 app.use(courseRouter);
-app.use(achievementRouter);
+
 
 app.get("/", function(req, res) {
   res.send("GET Login/Home page");

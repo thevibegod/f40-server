@@ -50,10 +50,15 @@ router.get("/updateprofile", function(req, res) {
 router.post("/addprofile", upload.single("picture"), (req, res) => {
   const newProfile = new profileSchema({
     name: req.body.name,
+    mailId:req.body.mailId,
     id: req.file.id,
     batch: req.body.batch,
-    attendance: req.body.attendance,
-    mentorName: req.body.mentorName,
+    studentMentorName: req.body.studentMentorName,
+    studentMentorMail: req.body.studentMentorMail,
+    studentMentorPhone: req.body.studentMentorPhone,
+    facultyMentorName: req.body.facultyMentorName,
+    facultyMentorMail: req.body.facultyMentorMail,
+    facultyMentorPhone: req.body.facultyMentorPhone,
     rollNo: req.body.rollNo
   });
   newProfile
@@ -75,10 +80,15 @@ router.post("/addachievement", (req, res) => {
         data.achievements.push(req.body.achievement);
         const prof = new profileSchema({
           name: data.name,
-          id: data.id,
+          mailId:data.mailId,
+          id: req.file.id,
           batch: data.batch,
-          attendance: data.attendance,
-          mentorName: data.mentorName,
+          studentMentorName: data.studentMentorName,
+          studentMentorMail: data.studentMentorMail,
+          studentMentorPhone: data.studentMentorPhone,
+          facultyMentorName: data.facultyMentorName,
+          facultyMentorMail: data.facultyMentorMail,
+          facultyMentorPhone: data.facultyMentorPhone,
           rollNo: data.rollNo,
           achievements: data.achievements
         });
@@ -102,10 +112,15 @@ router.post("/removeachievement", (req, res) => {
         data.achievements.splice(req.body.id, 1);
         const prof = new profileSchema({
           name: data.name,
-          id: data.id,
+          mailId:data.mailId,
+          id: req.file.id,
           batch: data.batch,
-          attendance: data.attendance,
-          mentorName: data.mentorName,
+          studentMentorName: data.studentMentorName,
+          studentMentorMail: data.studentMentorMail,
+          studentMentorPhone: data.studentMentorPhone,
+          facultyMentorName: data.facultyMentorName,
+          facultyMentorMail: data.facultyMentorMail,
+          facultyMentorPhone: data.facultyMentorPhone,
           rollNo: data.rollNo,
           achievements: data.achievements
         });
@@ -168,10 +183,15 @@ router.post(
       .then(() => {
         const newProfile = new profileSchema({
           name: req.body.name,
-          batch: req.body.batch,
+          mailId:req.body.mailId,
           id: req.file.id,
-          attendance: req.body.attendance,
-          mentorName: req.body.mentorName,
+          batch: req.body.batch,
+          studentMentorName: req.body.studentMentorName,
+          studentMentorMail: req.body.studentMentorMail,
+          studentMentorPhone: req.body.studentMentorPhone,
+          facultyMentorName: req.body.facultyMentorName,
+          facultyMentorMail: req.body.facultyMentorMail,
+          facultyMentorPhone: req.body.facultyMentorPhone,
           rollNo: req.body.rollNo
         });
         newProfile.save();

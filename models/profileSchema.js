@@ -16,17 +16,36 @@ let profileSchema = new Schema({
     required:true,
     unique:true
   },
+  mailId:{
+    type:String,required:true
+  },
   batch:{
     type:String,
     required:true
   },
-  mentorName:{
+  studentMentorName:{
     type: String,
     required: true
   },
-  attendance:{
-    type: Number,
+  studentMentorMail:{
+    type: String,
     required: true
+  },
+  studentMentorPhone:{
+    type:String,
+    required:true
+  },
+  facultyMentorName:{
+    type: String,
+    required: true
+  },
+  facultyMentorMail:{
+    type: String,
+    required: true
+  },
+  facultyMentorPhone:{
+    type:String,
+    required:true
   },
   achievements:{
     type: [String]
