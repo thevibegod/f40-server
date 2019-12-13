@@ -66,7 +66,7 @@ router.post("/addprofile", upload.single("picture"), (req, res) => {
 
 router.post("/addachievement", (req, res) => {
   if (!req.query.rollNo) {
-    return res.status(400).send("Bad Request.");
+    return res.status(400).json({ success: false, msg: "Bad request" });
   }
   profileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
     profileSchema
@@ -84,14 +84,16 @@ router.post("/addachievement", (req, res) => {
         });
         prof.save();
       })
-      .then(() => res.status(200).send("Updated Profile"))
+      .then(() =>
+        res.status(200).json({ success: true, msg: "Achievement added" })
+      )
       .catch(err => res.json(err));
   });
 });
 
 router.post("/removeachievement", (req, res) => {
   if (!req.query.rollNo || !req.body.id) {
-    return res.status(400).send("Bad Request.");
+    return res.status(400).json({ success: false, msg: "Bad request" });
   }
   profileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
     profileSchema
@@ -109,14 +111,16 @@ router.post("/removeachievement", (req, res) => {
         });
         prof.save();
       })
-      .then(() => res.status(200).send("Updated Profile"))
+      .then(() =>
+        res.status(200).json({ success: true, msg: "Updated Profile" })
+      )
       .catch(err => res.json(err));
   });
 });
 
 router.get("/studentprofilepicture", (req, res) => {
   if (!req.query.rollNo) {
-    return res.status(400).send("Bad Request.");
+    return res.status(400).json({ success: false, msg: "Bad request" });
   }
   profileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
     gfs.files.findOne({ _id: data.id }, (err, file) => {
