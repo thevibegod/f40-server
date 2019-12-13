@@ -1,6 +1,6 @@
 # Users Calls:
 
-* ## POST /validateuser
+- ## POST /validateuser
 
 ### request (body):
 
@@ -19,7 +19,7 @@ token: <token string>
 
 ---
 
-* ## GET /createuser
+- ## GET /createuser
 
 ### request :
 
@@ -31,7 +31,7 @@ form
 
 ---
 
-* ## POST /createuser
+- ## POST /createuser
 
 ### request (body):
 
@@ -51,7 +51,7 @@ msg: <string>
 
 ---
 
-* ## DELETE /user
+- ## DELETE /user
 
 ### request :
 
@@ -70,7 +70,7 @@ msg: <string>
 
 ---
 
-* ## PUT /user
+- ## PUT /user
 
 ### request :
 
@@ -90,24 +90,35 @@ msg: <string>
 ---
 
 # Profile Calls
-* ## GET /addprofile
+
+- ## GET /addprofile
+
 ### request :
+
 X-Access-Token
+
 ### response :
+
 form
 
 ---
 
-* ## GET /updateprofile
+- ## GET /updateprofile
+
 ### request :
+
 X-Access-Token
+
 ### response :
+
 form
 
 ---
 
-* ## POST /addprofile
+- ## POST /addprofile
+
 ### request (body):
+
 X-Access-Token
 
 name,
@@ -118,6 +129,7 @@ rollNo
 id(file)
 
 ### response :
+
 ```
 {
   success: <boolean>,
@@ -127,13 +139,16 @@ id(file)
 
 ---
 
-* ## GET /studentprofilepicture
+- ## GET /studentprofilepicture
+
 ### request (body):
+
 X-Access-Token
 
 rollNo
 
 ### response :
+
 ```
 {
   success: false,
@@ -147,20 +162,25 @@ image
 
 ---
 
-* ## GET /studentprofiledetails
+- ## GET /studentprofiledetails
+
 ### request (body):
+
 X-Access-Token
 
 rollNo
 
 ### response :
+
 ```
 {
   success: <boolean>,
   msg:  <string>
 }
 ```
+
 or
+
 ```
 {
   name : <string>
@@ -174,14 +194,16 @@ or
 
 ---
 
+- ## GET /removestudentprofiledetails
 
-* ## GET /removestudentprofiledetails
 ### request (body):
+
 X-Access-Token
 
 rollNo
 
 ### response :
+
 ```
 {
   success: <boolean>,
@@ -191,9 +213,12 @@ rollNo
 
 ---
 
-* ## POST /studentprofiledetailsupdation
+- ## POST /studentprofiledetailsupdation
+
 ### request (body):
+
 X-Access-Token
+
 ```
 {
   name : <string>
@@ -206,17 +231,61 @@ X-Access-Token
 ```
 
 ### response :
+
 ```
 {
   success: <boolean>,
   msg:  <string>
 }
 ```
+
 or
+
 ```
 {
   success: <boolean>,
   err: <object>
+}
+```
+
+---
+
+- ## POST /addachievement
+
+### request (body):
+
+X-Access-Token
+rollNo (query)
+
+achievement (body)
+
+### response :
+
+```
+{
+  success: <boolean>,
+  msg:  <string>
+}
+```
+
+---
+
+- ## POST /removeachievement
+
+### request (body):
+
+X-Access-Token
+rollNo (query)
+id (query)
+
+achievement (body)
+
+### response :
+
+```
+{
+  success: <boolean>,
+  msg:  <string>
 }
 ```
 

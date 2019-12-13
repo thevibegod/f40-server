@@ -112,7 +112,7 @@ router.post("/removeachievement", (req, res) => {
         prof.save();
       })
       .then(() =>
-        res.status(200).json({ success: true, msg: "Updated Profile" })
+        res.status(200).json({ success: true, msg: "Removed achievement" })
       )
       .catch(err => res.json(err));
   });
