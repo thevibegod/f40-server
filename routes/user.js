@@ -9,12 +9,12 @@ mongoose.connect(connStr, function(err) {
 });
 
 router.get("/createuser", (req, res) => {
-  if (req.loggedInUser.type === "admin") res.render("user");
+  if (req.loggedInUser.user.type === "admin") res.render("user");
   else res.status(403).send("No permission to access this page");
 });
 
 router.post("/createuser", (req, res) => {
-  if (req.loggedInUser.username !== "admin")
+  if (req.loggedInUser.user.type !== "admin")
     return res
       .status(403)
       .send({ success: false, msg: "No permission to access this page" });
@@ -27,12 +27,12 @@ router.post("/createuser", (req, res) => {
   // save user to database
   testUser
     .save()
-    .then(res.status(201).json({ success: true, msg: "User Created" }))
+    .then(()=>res.status(201).json({ success: true, msg: "User Created" }))
     .catch(err => res.json(err));
 });
 
 router.delete("/user", (req, res) => {
-  if (req.loggedInUser.type !== "admin")
+  if (req.loggedInUser.user.type !== "admin")
     return res
       .status(403)
       .json({ success: false, msg: "No permission to access this page" });

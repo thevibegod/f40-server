@@ -6,8 +6,7 @@ const userRouter = require("./routes/user");
 var eventRouter = require("./routes/events");
 var notificationRouter = require("./routes/notification");
 var courseRouter = require("./routes/course");
-
-
+const attendanceRouter = require("./routes/attendance");
 const auth = require("./auth/auth");
 const app = express();
 
@@ -43,7 +42,7 @@ app.post("/validateuser", (req, res) => {
             res.json({
               success: true,
               msg: "Login Successful",
-              token: auth.generateToken(user.username)
+              token: auth.generateToken(user)
             });
           } else {
             res.json({
@@ -63,7 +62,7 @@ app.use(eventRouter);
 app.use(profileRouter);
 app.use(notificationRouter);
 app.use(courseRouter);
-
+app.use(attendanceRouter);
 
 app.get("/", function(req, res) {
   res.send("GET Login/Home page");
