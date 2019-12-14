@@ -9,7 +9,7 @@ mongoose.connect(connStr, function(err) {
 });
 
 router.get("/createuser", (req, res) => {
-  if (req.loggedInUser.username === "admin") res.render("user");
+  if (req.loggedInUser.type === "admin") res.render("user");
   else res.status(403).send("No permission to access this page");
 });
 
@@ -20,7 +20,8 @@ router.post("/createuser", (req, res) => {
       .send({ success: false, msg: "No permission to access this page" });
   const testUser = new UserSchema({
     username: req.body.username,
-    password: req.body.password
+    password: req.body.password,
+    type:req.body.type
   });
 
   // save user to database
@@ -31,7 +32,7 @@ router.post("/createuser", (req, res) => {
 });
 
 router.delete("/user", (req, res) => {
-  if (req.loggedInUser.username !== "admin")
+  if (req.loggedInUser.type !== "admin")
     return res
       .status(403)
       .json({ success: false, msg: "No permission to access this page" });
@@ -50,7 +51,8 @@ router.put("/user", (req, res) => {
   UserSchema.findOneAndDelete({ username: req.query.username }).then(() => {
     const testUser = new UserSchema({
       username: req.body.username,
-      password: req.body.password
+      password: req.body.password,
+      type: req.body.type
     });
     testUser
       .save()
