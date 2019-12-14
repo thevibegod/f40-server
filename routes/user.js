@@ -20,7 +20,8 @@ router.post("/createuser", (req, res) => {
       .send({ success: false, msg: "No permission to access this page" });
   const testUser = new UserSchema({
     username: req.body.username,
-    password: req.body.password
+    password: req.body.password,
+    type:req.body.type
   });
 
   // save user to database
@@ -50,7 +51,8 @@ router.put("/user", (req, res) => {
   UserSchema.findOneAndDelete({ username: req.query.username }).then(() => {
     const testUser = new UserSchema({
       username: req.body.username,
-      password: req.body.password
+      password: req.body.password,
+      type: req.body.type
     });
     testUser
       .save()
