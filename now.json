@@ -55,6 +55,10 @@
     "src": "/removeachievement",
     "dest": "/index.js",
     "methods": ["POST"]
+  },{
+    "src": "/studentattendance",
+    "dest": "/index.js",
+    "methods": ["GET"]
   }
   ]
 }

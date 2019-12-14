@@ -60,4 +60,11 @@ router.put("/user", (req, res) => {
   });
 });
 
+router.get("/students",(req,res)=>{
+  let arr = [];
+  UserSchema.find({type:"student"}).then((data)=>data.map(user=>{
+    arr.push(user.username);
+  })).then(()=>res.json(arr)).catch(err=>res.json(err))
+})
+
 module.exports = router;
