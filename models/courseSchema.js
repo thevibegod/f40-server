@@ -9,7 +9,7 @@ var courseSchema = new mongoose.Schema({
     required: true
   },
   financialaid :{
-    type:Boolean,
+    type:String,
     required: true
   },
   link :{
