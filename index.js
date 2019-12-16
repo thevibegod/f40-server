@@ -8,6 +8,7 @@ var notificationRouter = require("./routes/notification");
 var courseRouter = require("./routes/course");
 const attendanceRouter = require("./routes/attendance");
 const assessmentRouter = require("./routes/assessment");
+const taskRouter = require("./routes/tasks");
 const auth = require("./auth/auth");
 const app = express();
 
@@ -65,6 +66,7 @@ app.use(notificationRouter);
 app.use(courseRouter);
 app.use(attendanceRouter);
 app.use(assessmentRouter);
+app.use(taskRouter);
 
 app.get("/", function(req, res) {
   res.send("GET Login/Home page");
