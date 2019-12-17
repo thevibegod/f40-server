@@ -5,7 +5,7 @@ var taskSchema = new mongoose.Schema({
   topic:{type:String, required: true,unique:true},
   deadline:{type:String,required:true},
   uploadTime:{type:String,required:true,unique:true},
-  attachments:{type:[{rollNo:String,attachmentId:mongoose.ObjectId,feedback:String,timeStamp:String}]}
+  attachments:{type:[{rollNo:String,attachmentId:String,feedback:String,timeStamp:String}]}
 });
 
 module.exports = mongoose.model("tasks", taskSchema);

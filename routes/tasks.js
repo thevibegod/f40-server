@@ -8,6 +8,8 @@ var path = require('path');
 var GridFsStorage = require('multer-gridfs-storage');
 var Grid = require('gridfs-stream');
 var bson=require('bson');
+var formidable = require('formidable');
+var fs = require('fs');
 
 var createTimeStamp = ()=>{
   let dateObj = new Date();
@@ -44,10 +46,6 @@ var storage = new GridFsStorage({
 });
 const upload = multer({ storage });
 
-router.post('/test',(req,res)=>{
-console.log(req.feedback);
-
-})
 router.post('/addtask',(req,res)=>{
   if(!req.body.topic || !req.body.taskType){
     res.status(400).send("Bad Request");
@@ -66,47 +64,67 @@ router.get('/allscores',(req,res)=>{
 })
 
 
-router.post('/uploadtask',upload.single('attachment'),(req,res)=>{
+router.post('/uploadtask',(req,res)=>{
+
   if(!req.query.rollNo){
     res.status(400).send("Bad Request");
   }
+
   if(!req.query.clear){
-    taskSchema.findOneAndDelete({topic:req.body.topic}).then((data)=>{
-      let attachmentArray = data.attachments;
-      let obj = {rollNo:req.query.rollNo,feedback:req.body.feedback,attachmentId:req.file.id,timeStamp:createTimeStamp()};
-      attachmentArray.push(obj);
-      new taskSchema({_id:data._id,taskType:req.body.taskType,topic:req.body.topic,attachments:attachmentArray,uploadTime:data.uploadTime,deadline:data.deadline}).save().then(()=>res.status(200).send("Task submitted."))
-      .catch(err=>res.status(500).json(err));
+    var form = new formidable.IncomingForm();
+    form.parse(req, function (err, fields, files) {
+      var oldpath = files.attachment.path;
+      var ext = files.attachment.name.split('.')[1];
+      var newpath = './tasks/' + req.query.rollNo + 'ml' + Date.parse(new Date()) + '.' + ext ;
+      fs.rename(oldpath, newpath, function (err) {
+        if (err) throw err;
+        taskSchema.findOneAndDelete({topic:fields.topic}).then((data)=>{
+          let attachmentArray = data.attachments;
+          let obj = {rollNo:req.query.rollNo,feedback:fields.feedback,attachmentId:newpath,timeStamp:createTimeStamp()};
+          attachmentArray.push(obj);
+          new taskSchema({_id:data._id,taskType:fields.taskType,topic:fields.topic,attachments:attachmentArray,uploadTime:data.uploadTime,deadline:data.deadline}).save().then(()=>res.status(200).send("Task submitted."))
+          .catch(err=>res.status(500).json(err));
+          })
+        });
+      })
+    }
+
+    else{
+      //this is for deleting a file in folder
+      // fs.unlink(attachmentId, function (err) {
+      //   if (err) throw err;
+      //   console.log('File deleted!');
+      // });
+
+
+      taskSchema.findOneAndDelete({topic:req.body.topic}).then(data=>{
+        scoreSchema.findOneAndDelete({taskId:data._id}).then(val=>{
+          let scoreArray = val.scores;
+          let ind;
+          scoreArray.map((val,index)=>{
+            if(val.rollNo===req.query.rollNo){
+              ind=index;
+            }
+          })
+          scoreArray.splice(ind,1);
+          new scoreSchema({_id:val._id,taskId:data._id,scores:scoreArray}).save();
+        })
+        let id = data._id;
+        let attachmentArray = data.attachments;
+        let ind;
+        let uploadedTime = data.uploadTime;
+        let setDeadline = data.deadline;
+        attachmentArray.map((data,index)=>{
+          if(data.rollNo===req.query.rollNo){
+            ind = index;
+          }
+        });
+        attachmentArray.splice(ind,1);
+        gfs.remove({_id:data.attachmentId,root:'uploads'});
+        new taskSchema({_id:data._id,taskType:req.body.taskType,topic:req.body.topic,attachments:attachmentArray,uploadTime:uploadedTime,deadline:setDeadline}).save().then(()=>res.status(200).send("Task submission cleared"))
+        .catch(err=>res.status(500).json(err));
     })
-  }else{
-  taskSchema.findOneAndDelete({topic:req.body.topic}).then(data=>{
-  scoreSchema.findOneAndDelete({taskId:data._id}).then(val=>{
-    let scoreArray = val.scores;
-    let ind;
-    scoreArray.map((val,index)=>{
-      if(val.rollNo===req.query.rollNo){
-        ind=index;
-      }
-    })
-    scoreArray.splice(ind,1);
-    new scoreSchema({_id:val._id,taskId:data._id,scores:scoreArray}).save();
-  })
-    let id = data._id;
-    let attachmentArray = data.attachments;
-    let ind;
-    let uploadedTime = data.uploadTime;
-    let setDeadline = data.deadline;
-    attachmentArray.map((data,index)=>{
-      if(data.rollNo===req.query.rollNo){
-        ind = index;
-      }
-    });
-    attachmentArray.splice(ind,1);
-    gfs.remove({_id:data.attachmentId,root:'uploads'});
-    new taskSchema({_id:data._id,taskType:req.body.taskType,topic:req.body.topic,attachments:attachmentArray,uploadTime:uploadedTime,deadline:setDeadline}).save().then(()=>res.status(200).send("Task submission cleared"))
-    .catch(err=>res.status(500).json(err));
-  })
-}
+  }
 })
 
 router.get('/removetask',(req,res)=>{
