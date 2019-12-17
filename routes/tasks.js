@@ -7,7 +7,7 @@ var crypto = require('crypto');
 var path = require('path');
 var GridFsStorage = require('multer-gridfs-storage');
 var Grid = require('gridfs-stream');
-
+var bson=require('bson');
 
 var createTimeStamp = ()=>{
   let dateObj = new Date();
@@ -44,6 +44,10 @@ var storage = new GridFsStorage({
 });
 const upload = multer({ storage });
 
+router.post('/test',(req,res)=>{
+console.log(req.feedback);
+
+})
 router.post('/addtask',(req,res)=>{
   if(!req.body.topic || !req.body.taskType){
     res.status(400).send("Bad Request");
@@ -138,6 +142,7 @@ router.get('/attachment',(req,res)=>{
       if(obj.rollNo===req.query.rollNo){
       gfs.files.findOne({ _id: obj.attachmentId }, (err, file) => {
         const readStream = gfs.createReadStream(file.filename);
+        res.setHeader('Content-type','application/pdf');
         readStream.pipe(res);
     })
     }
