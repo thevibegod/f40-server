@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const ObjectId = Schema.ObjectId;
 
 let profileSchema = new Schema({
   name : {
@@ -8,7 +7,7 @@ let profileSchema = new Schema({
     required : true
   },
   id : {
-    type: ObjectId,
+    type: String,
     required: true
   },
   rollNo :{

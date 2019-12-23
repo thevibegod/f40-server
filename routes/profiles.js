@@ -3,42 +3,15 @@ var router = express.Router();
 
 var mongoose = require("mongoose");
 var profileSchema = require("../models/profileSchema");
-var multer = require("multer");
-var crypto = require("crypto");
-var path = require("path");
-var GridFsStorage = require("multer-gridfs-storage");
-var Grid = require("gridfs-stream");
-
-const conn = mongoose.createConnection(
-  "mongodb+srv://adarsh18bec095:Adarsh123@f40cluster-wugpz.mongodb.net/test?retryWrites=true&w=majority"
-);
-let gfs;
-
-conn.once("open", function() {
-  gfs = Grid(conn.db, mongoose.mongo);
-  gfs.collection("uploads");
+var formidable = require('formidable');
+var fs = require('fs');
+var connStr =
+  "mongodb+srv://adarsh18bec095:Adarsh123@f40cluster-wugpz.mongodb.net/test?retryWrites=true&w=majority";
+mongoose.connect(connStr, function(err) {
+  if (err) throw err;
+  console.log("Successfully connected to MongoDB");
 });
 
-var storage = new GridFsStorage({
-  url:
-    "mongodb+srv://adarsh18bec095:Adarsh123@f40cluster-wugpz.mongodb.net/test?retryWrites=true&w=majority",
-  file: (req, file) => {
-    return new Promise((resolve, reject) => {
-      crypto.randomBytes(16, (err, buf) => {
-        if (err) {
-          return reject(err);
-        }
-        const filename = buf.toString("hex") + path.extname(file.originalname);
-        const fileInfo = {
-          filename: filename,
-          bucketName: "uploads"
-        };
-        resolve(fileInfo);
-      });
-    });
-  }
-});
-const upload = multer({ storage });
 
 router.get("/addprofile", function(req, res) {
   res.render("profile");
@@ -47,26 +20,36 @@ router.get("/updateprofile", function(req, res) {
   res.render("profile2");
 });
 
-router.post("/addprofile", upload.single("picture"), (req, res) => {
-  const newProfile = new profileSchema({
-    name: req.body.name,
-    mailId:req.body.mailId,
-    id: req.file.id,
-    batch: req.body.batch,
-    studentMentorName: req.body.studentMentorName,
-    studentMentorMail: req.body.studentMentorMail,
-    studentMentorPhone: req.body.studentMentorPhone,
-    facultyMentorName: req.body.facultyMentorName,
-    facultyMentorMail: req.body.facultyMentorMail,
-    facultyMentorPhone: req.body.facultyMentorPhone,
-    rollNo: req.body.rollNo
-  });
-  newProfile
-    .save()
-    .then(() =>
-      res.status(201).json({ success: true, msg: "Added Profile to db" })
-    )
-    .catch(err => res.json({ sucess: false, err }));
+router.post("/addprofile", (req, res) => {
+  var form = new formidable.IncomingForm();
+  form.parse(req, function (err, fields, files) {
+    var oldpath = files.attachment.path;
+    var ext = files.attachment.name.split('.')[1];
+    var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
+    fs.rename(oldpath, newpath, function (err) {
+      if (err) throw err;
+      const newProfile = new profileSchema({
+        name: fields.name,
+        mailId:fields.mailId,
+        id: newpath.slice(8),
+        batch: fields.batch,
+        studentMentorName:fields.studentMentorName,
+        studentMentorMail:fields.studentMentorMail,
+        studentMentorPhone:fields.studentMentorPhone,
+        facultyMentorName: fields.facultyMentorName,
+        facultyMentorMail: fields.facultyMentorMail,
+        facultyMentorPhone:fields.facultyMentorPhone,
+        rollNo:fields.rollNo
+      });
+      newProfile
+        .save()
+        .then(() =>
+          res.status(201).json({ success: true, msg: "Added Profile to db" })
+        )
+        .catch(err => res.json({ sucess: false, err }));
+      });
+    })
+
 });
 
 router.post("/addachievement", (req, res) => {
@@ -81,7 +64,7 @@ router.post("/addachievement", (req, res) => {
         const prof = new profileSchema({
           name: data.name,
           mailId:data.mailId,
-          id: req.file.id,
+          id: data.id,
           batch: data.batch,
           studentMentorName: data.studentMentorName,
           studentMentorMail: data.studentMentorMail,
@@ -113,7 +96,7 @@ router.post("/removeachievement", (req, res) => {
         const prof = new profileSchema({
           name: data.name,
           mailId:data.mailId,
-          id: req.file.id,
+          id: data.id,
           batch: data.batch,
           studentMentorName: data.studentMentorName,
           studentMentorMail: data.studentMentorMail,
@@ -133,17 +116,17 @@ router.post("/removeachievement", (req, res) => {
   });
 });
 
-router.get("/studentprofilepicture", (req, res) => {
-  if (!req.query.rollNo) {
-    return res.status(400).json({ success: false, msg: "Bad request" });
-  }
-  profileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
-    gfs.files.findOne({ _id: data.id }, (err, file) => {
-      const readStream = gfs.createReadStream(file.filename);
-      readStream.pipe(res);
-    });
-  });
-});
+// router.get("/studentprofilepicture", (req, res) => {
+//   if (!req.query.rollNo) {
+//     return res.status(400).json({ success: false, msg: "Bad request" });
+//   }
+//   profileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
+//     gfs.files.findOne({ _id: data.id }, (err, file) => {
+//       const readStream = gfs.createReadStream(file.filename);
+//       readStream.pipe(res);
+//     });
+//   });
+// });
 
 router.get("/studentprofiledetails", (req, res) => {
   if (!req.query.rollNo) {
@@ -161,45 +144,56 @@ router.get("/removestudentprofiledetails", (req, res) => {
   profileSchema
     .findOneAndDelete({ rollNo: req.query.rollNo })
     .then(data => {
-      gfs.remove({ _id: data.id, root: "uploads" });
+      fs.unlink('./public'+data.id, function (err) {
+        if (err) throw err;
+        console.log('File deleted!');
+      });
     })
     .then(
       res.status(200).json({ success: true, msg: "Profile removed from db" })
     );
 });
 
-router.post(
-  "/studentprofiledetailsupdation",
-  upload.single("picture"),
-  (req, res) => {
-    if (!req.body.rollNo) {
+router.post("/studentprofiledetailsupdation",(req, res) => {
+  var form = new formidable.IncomingForm();
+  form.parse(req, function (err, fields, files) {
+    if (!fields.rollNo) {
       return res.status(400).json({ success: false, msg: "Bad Request" });
     }
     profileSchema
-      .findOneAndDelete({ rollNo: req.body.rollNo })
+      .findOneAndDelete({ rollNo: fields.rollNo })
       .then(data => {
-        gfs.remove({ _id: data.id, root: "uploads" });
+        fs.unlink('./public'+data.id, function (err) {
+          if (err) throw err;
+          console.log('File deleted!');
+        });
       })
       .then(() => {
+        var oldpath = files.attachment.path;
+        var ext = files.attachment.name.split('.')[1];
+        var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
+        fs.rename(oldpath, newpath, function (err) {
+          if (err) throw err;
         const newProfile = new profileSchema({
-          name: req.body.name,
-          mailId:req.body.mailId,
-          id: req.file.id,
-          batch: req.body.batch,
-          studentMentorName: req.body.studentMentorName,
-          studentMentorMail: req.body.studentMentorMail,
-          studentMentorPhone: req.body.studentMentorPhone,
-          facultyMentorName: req.body.facultyMentorName,
-          facultyMentorMail: req.body.facultyMentorMail,
-          facultyMentorPhone: req.body.facultyMentorPhone,
-          rollNo: req.body.rollNo
+          name: fields.name,
+          mailId:fields.mailId,
+          id: files.id,
+          batch: fields.batch,
+          studentMentorName: fields.studentMentorName,
+          studentMentorMail: fields.studentMentorMail,
+          studentMentorPhone: fields.studentMentorPhone,
+          facultyMentorName: fields.facultyMentorName,
+          facultyMentorMail: fields.facultyMentorMail,
+          facultyMentorPhone: fields.facultyMentorPhone,
+          rollNo: fields.rollNo
         });
         newProfile.save();
       })
+    })
       .then(() =>
         res.status(201).json({ success: true, msg: "Profile updated" })
       )
-      .catch(err => res.json({ success: false, err }));
-  }
-);
+      .catch(err => res.ststus(400).json({ success: false}));
+  })
+    })
 module.exports = router;
