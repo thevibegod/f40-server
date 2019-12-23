@@ -17,9 +17,9 @@ app.use(cors());
 app.use(express.static('public'));
 app.use(function(req, res, next) {
   res.setHeader('Access-Control-Expose-Headers', 'Access-Control-*, Origin, X-Requested-With, Content-Type, Accept, Authorization');
- res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
- res.setHeader('Access-Control-Allow-Methods', 'HEAD, GET, POST, OPTIONS, PUT, PATCH, DELETE');
- res.setHeader('Access-Control-Allow-Headers', 'Access-Control-*, Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001');
+  res.setHeader('Access-Control-Allow-Methods', 'HEAD, GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Access-Control-*, Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.setHeader('Access-Control-Allow-Credentials', true);
   next();
 });
@@ -31,29 +31,40 @@ app.use(bodyParser.urlencoded({extended: true, limit: '100mb' }));
 connectDB();
 app.set("view engine", "ejs");
 
+// fetch user and test password verification
 app.post("/validateuser", (req, res) => {
-  // fetch user and test password verification
+
   require("./models/UserSchema").findOne(
     { username: req.body.username },
+
     function(err, user) {
       if (err) throw err;
-      user.comparePassword(req.body.password, function(err, isMatch) {
-        if (err) throw err;
-        else {
-          if (isMatch) {
-            res.json({
-              success: true,
-              msg: "Login Successful",
-              token: auth.generateToken(user)
-            });
-          } else {
-            res.json({
-              success: false,
-              msg: "Invalid username or password"
-            });
+
+      if(user === null) {
+        res.status(400).json({
+          success: false,
+          msg: "Invalid username or password"
+        });
+      }
+      else {
+        user.comparePassword(req.body.password, function(err, isMatch) {
+          if (err) throw err;
+          else {
+            if (isMatch) {
+              res.json({
+                success: true,
+                msg: "Login Successful",
+                token: auth.generateToken(user)
+              });
+            } else {
+              res.status(400).json({
+                success: false,
+                msg: "Invalid username or password"
+              });
+            }
           }
-        }
-      });
+        });
+      }
     }
   );
 });
