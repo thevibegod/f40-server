@@ -9,6 +9,7 @@ var courseRouter = require("./routes/course");
 const attendanceRouter = require("./routes/attendance");
 const assessmentRouter = require("./routes/assessment");
 const taskRouter = require("./routes/tasks");
+const menteeProfileRouter = require("./routes/menteeProfiles");
 const auth = require("./auth/auth");
 const app = express();
 
@@ -54,7 +55,8 @@ app.post("/validateuser", (req, res) => {
               res.json({
                 success: true,
                 msg: "Login Successful",
-                token: auth.generateToken(user)
+                token: auth.generateToken(user),
+                type:user.type
               });
             } else {
               res.status(400).json({
@@ -77,6 +79,7 @@ app.use(notificationRouter);
 app.use(courseRouter);
 app.use(attendanceRouter);
 app.use(assessmentRouter);
+app.use(menteeProfileRouter);
 app.use(taskRouter);
 
 app.get("/", function(req, res) {

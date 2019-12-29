@@ -2,53 +2,54 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 let profileSchema = new Schema({
-  name : {
-    type : String,
-    required : true
-  },
-  id : {
+  name: {
     type: String,
     required: true
   },
-  rollNo :{
-    type:String,
-    required:true,
-    unique:true
-  },
-  mailId:{
-    type:String,required:true
-  },
-  batch:{
-    type:String,
-    required:true
-  },
-  studentMentorName:{
+  id: {
     type: String,
     required: true
   },
-  studentMentorMail:{
+  rollNo: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  mailId: {
     type: String,
     required: true
   },
-  studentMentorPhone:{
-    type:String,
-    required:true
-  },
-  facultyMentorName:{
+  batch: {
     type: String,
     required: true
   },
-  facultyMentorMail:{
+  studentMentorName: {
     type: String,
     required: true
   },
-  facultyMentorPhone:{
-    type:String,
-    required:true
+  studentMentorMail: {
+    type: String,
+    required: true
   },
-  achievements:{
+  studentMentorPhone: {
+    type: String,
+    required: true
+  },
+  facultyMentorName: {
+    type: String,
+    required: true
+  },
+  facultyMentorMail: {
+    type: String,
+    required: true
+  },
+  facultyMentorPhone: {
+    type: String,
+    required: true
+  },
+  achievements: {
     type: [String]
   }
 });
 
- module.exports = mongoose.model('Profile', profileSchema);
+module.exports = mongoose.model('Profile', profileSchema);
