@@ -132,7 +132,7 @@ router.post("/mentorprofiledetailsupdation",(req, res) => {
           console.log('File deleted!');
         });
       })
-      .then((data) => {
+      .then(() => {
         var oldpath = files.attachment.path;
         var ext = files.attachment.name.split('.')[1];
         var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
