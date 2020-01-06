@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-
+var scoreSchema = require("../models/scoreSchema");
 var mongoose = require("mongoose");
 var profileSchema = require("../models/profileSchema");
 var formidable = require('formidable');
@@ -43,6 +43,7 @@ router.post("/addprofile", (req, res) => {
       });
       newProfile
         .save()
+        .then(()=>new scoreSchema({rollNo:fields.rollNo}).save())
         .then(() =>
           res.status(201).json({ success: true, msg: "Added Profile to db" })
         )
@@ -85,7 +86,7 @@ router.post("/addachievement", (req, res) => {
 });
 
 router.post("/removeachievement", (req, res) => {
-  if (!req.query.rollNo || !req.body.id) {
+  if (!req.query.rollNo || req.body.id===null) {
     return res.status(400).json({ success: false, msg: "Bad request" });
   }
   profileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
@@ -141,6 +142,7 @@ router.get("/removestudentprofiledetails", (req, res) => {
   if (!req.query.rollNo) {
     return res.status(400).json({ success: false, msg: "Bad Request." });
   }
+  scoreSchema.findOneAndDelete({rollNo:req.query.rollNo})
   profileSchema
     .findOneAndDelete({ rollNo: req.query.rollNo })
     .then(data => {

@@ -5,12 +5,12 @@ var router = require("express").Router();
 var formidable = require('formidable');
 var fs = require('fs');
 
-var createTimeStamp = ()=>{
-  let dateObj = new Date();
-  let time = dateObj.toTimeString().slice(0,8);
-  var date = dateObj.getDate()+'/'+(dateObj.getMonth()+1)+'/'+dateObj.getFullYear();
-  return date + ' ' + time;
+var createTimeStamp = ()=> {
+  dateObj = new Date();
+  dateObj.setMinutes(dateObj.getMinutes());
+  return `${(dateObj.getDate())>9?dateObj.getDate():'0'+dateObj.getDate()}/${(dateObj.getMonth()+1)>9?dateObj.getMonth()+1:'0'+(dateObj.getMonth()+1).toString()}/${(dateObj.getFullYear())>9?dateObj.getFullYear():'0'+dateObj.getFullYear()} ${(dateObj.getHours())>9?dateObj.getHours():'0'+dateObj.getHours()}:${(dateObj.getMinutes())>9?dateObj.getMinutes():'0'+dateObj.getMinutes()}:${(dateObj.getSeconds())>9?dateObj.getSeconds():'0'+dateObj.getSeconds()}`
 }
+
 
 var connStr =
   "mongodb+srv://adarsh18bec095:Adarsh123@f40cluster-wugpz.mongodb.net/test?retryWrites=true&w=majority";
@@ -21,20 +21,30 @@ mongoose.connect(connStr, function(err) {
 
 
 router.post('/addtask',(req,res)=>{
-  if(!req.body.topic || !req.body.taskType){
+  if(!req.body.topic || !req.body.taskType ||!req.body.rollNo){
     res.status(400).send("Bad Request");
   }
-  new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time}).save().then((data)=>{new scoreSchema({taskId:data._id}).save()}).then(()=>res.status(201).send("Task created."))
+  new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time,rollNo:req.body.rollNo,attachment:null}).save().then((data)=>{
+    scoreSchema.findOneAndDelete({rollNo:req.body.rollNo}).then(val=>{
+      let arr = val.data;
+      let obj = {taskId:data._id,taskTopic:data.taskTopic,uploadTime:data.uploadTime,Score:null};
+      arr.push(obj);
+      new scoreSchema({rollNo:req.body.rollNo,data:arr}).save().then(()=>res.status(201).send("Task created."))
+    })
   .catch(err=>res.status(500).json(err));
 
 })
+})
 
 router.get('/alltasks',(req,res)=>{
-  taskSchema.find({}).sort({uploadTime:-1}).then(task=>res.status(200).json(task)).catch(err=>res.status(400).json(err));
+  if(!req.query.rollNo){
+    return res.status(400).json({success:false,message:"Bad Request"})
+  }
+  taskSchema.find({rollNo:req.query.rollNo}).sort({uploadTime:-1}).then(task=>res.status(200).json(task)).catch(err=>res.status(400).json(err));
 })
 
 router.get('/allscores',(req,res)=>{
-  scoreSchema.find({}).then(score=>res.status(200).json(score)).catch(err=>res.status(400).json(err));
+  scoreSchema.findOne({rollNo:req.query.rollNo}).then(score=>res.status(200).json({data:score.data})).catch(err=>res.status(400).json(err));
 })
 
 
@@ -52,11 +62,9 @@ router.post('/uploadtask',(req,res)=>{
       var newpath = './public/tasks/' + req.query.rollNo + 'ml' + Date.parse(new Date()) + '.' + ext ;
       fs.rename(oldpath, newpath, function (err) {
         if (err) throw err;
-        taskSchema.findOneAndDelete({topic:fields.topic}).then((data)=>{
-          let attachmentArray = data.attachments;
-          let obj = {rollNo:req.query.rollNo,feedback:fields.feedback,attachmentId:newpath.slice(8),timeStamp:createTimeStamp()};
-          attachmentArray.push(obj);
-          new taskSchema({_id:data._id,taskType:fields.taskType,topic:fields.topic,attachments:attachmentArray,uploadTime:data.uploadTime,deadline:data.deadline}).save().then(()=>res.status(200).send("Task submitted."))
+        taskSchema.findOneAndDelete({id:fields.taskId}).then((data)=>{
+          let obj = {feedback:fields.feedback,url:newpath.slice(8),timeStamp:createTimeStamp()};
+          new taskSchema({_id:data._id,taskType:fields.taskType,rollNo:req.query.rollNo,topic:fields.topic,attachment:obj,uploadTime:data.uploadTime,deadline:data.deadline,score:null}).save().then(()=>res.status(200).send("Task submitted."))
           .catch(err=>res.status(500).json(err));
           })
         });
@@ -66,34 +74,30 @@ router.post('/uploadtask',(req,res)=>{
     else{
       var form = new formidable.IncomingForm();
       form.parse(req, function (err, fields, files){
-        taskSchema.findOneAndDelete({topic:fields.topic}).then(data=>{
-          scoreSchema.findOneAndDelete({taskId:data._id}).then(val=>{
-            let scoreArray = val.scores;
+        taskSchema.findOneAndDelete({topic:fields.taskId}).then(data=>{
+          scoreSchema.findOneAndDelete({rollNo:req.query.rollNo}).then(val=>{
+            let scoreArray = val.data;
             let ind;
             scoreArray.map((val,index)=>{
-              if(val.rollNo===req.query.rollNo){
+              if(val.taskId===fields.taskId){
                 ind=index;
               }
             })
             scoreArray.splice(ind,1);
-            new scoreSchema({_id:val._id,taskId:data._id,scores:scoreArray}).save();
+            scoreArray.push({taskId:data._id,taskTopic:data.taskTopic,uploadTime:data.uploadTime,score:null})
+            new scoreSchema({_id:val._id,rollNo:req.query.rollNo,data:scoreArray}).save();
           })
           let id = data._id;
-          let attachmentArray = data.attachments;
+          let attachment = data.attachment;
           let ind;
           let uploadedTime = data.uploadTime;
           let setDeadline = data.deadline;
-          attachmentArray.map((data,index)=>{
-            if(data.rollNo===req.query.rollNo){
-              ind = index;
-              fs.unlink('./public'+data.attachmentId, function (err) {
+              fs.unlink('./public'+data.attachment.url, function (err) {
                 if (err) throw err;
                 console.log('File deleted!');
               });
-            }
-          });
-          attachmentArray.splice(ind,1);
-          new taskSchema({_id:data._id,taskType:fields.taskType,topic:fields.topic,attachments:attachmentArray,uploadTime:uploadedTime,deadline:setDeadline}).save().then(()=>res.status(200).send("Task submission cleared"))
+
+          new taskSchema({_id:data._id,taskType:fields.taskType,topic:fields.topic,attachment:null,uploadTime:uploadedTime,deadline:setDeadline,rollNo:req.query.rollNO}).save().then(()=>res.status(200).send("Task submission cleared"))
           .catch(err=>res.status(500).json(err));
       })
     })
@@ -101,28 +105,24 @@ router.post('/uploadtask',(req,res)=>{
 })
 
 router.get('/removetask',(req,res)=>{
-  if(!req.query.topic){
+  if(!req.query.taskId){
     res.status(400).send("Bad request");
   }
-  taskSchema.findOneAndDelete({topic:req.query.topic}).then(data=>{
-
-    let attachmentArray = data.attachments;
-    attachmentArray.map(val=>{
-      fs.unlink('./public'+val.attachmentId, function (err) {
+  taskSchema.findOneAndDelete({_id:req.query.taskId}).then(val=>{
+      fs.unlink('./public'+val.attachment.url, function (err) {
         if (err) throw err;
         console.log('File deleted!');
       });
-    })
   }).then(()=>res.status(200).send("Task removed")).catch(err=>res.json(err))
 })
 
 
 router.post('/modifytask',(req,res)=>{
-  if(!req.query.id){
+  if(!req.query.taskId){
     res.status(400).send("Bad request");
   }
-  taskSchema.findOneAndDelete({_id:req.query.id}).then(data=>{
-    new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time,attachments:data.attachments}).save().then(()=>res.status(201).send("Task modified."))
+  taskSchema.findOneAndDelete({_id:req.query.taskId}).then(data=>{
+    new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time,attachment:data.attachment,rollNo:req.body.rollNo}).save().then(()=>res.status(201).send("Task modified."))
     .catch(err=>res.status(500).json(err));
   })
 })
@@ -130,26 +130,24 @@ router.post('/modifytask',(req,res)=>{
 
 
 router.post('/gradetask',(req,res)=>{
-  if(!req.query.taskId){
+  if(!req.query.taskId || !req.query.rollNo){
     res.status(400).send("Bad request");
   }
-  let arr=Object.keys(req.body);
-  scoreSchema.findOneAndDelete({taskId:req.query.taskId}).then(value=>{
-    let scoreArray=value.scores;
-    arr.map((data,index)=>{
-        scoreArray.map((d,i)=>{
-          if(d.rollNo===data){
-            scoreArray.splice(i,1);
+  scoreSchema.findOneAndDelete({rollNo:req.query.rollNo}).then(value=>{
+    let scoreArray=value.data;
+    scoreArray.map((data,index)=>{
+          if(data.taskId===req.query.taskId){
+            let up = data.uploadTime;
+            let tt = data.taskTopic;
+            scoreArray.splice(index,1);
           }
         })
-      scoreArray.push({rollNo:data,score:req.body[data]});
+      scoreArray.push({uploadTime:up,taskType:tt,score:req.query.score,taskId:req.query.taskId});
     }
   )
 
-  new scoreSchema({_id:value._id,taskId:req.query.taskId,scores:scoreArray}).save().then(()=>res.status(200).send("Scores Updated"))
+  new scoreSchema({_id:value._id,data:scoreArray}).save().then(()=>res.status(200).send("Scores Updated"))
   .catch(err=>res.json(err));
-
-})
 
 })
 
