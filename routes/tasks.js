@@ -4,6 +4,7 @@ var mongoose = require("mongoose");
 var router = require("express").Router();
 var formidable = require('formidable');
 var fs = require('fs');
+var sortArray = require('../sort');
 
 var createTimeStamp = ()=> {
   dateObj = new Date();
@@ -27,7 +28,7 @@ router.post('/addtask',(req,res)=>{
   new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time,rollNo:req.body.rollNo,attachment:null}).save().then((data)=>{
     scoreSchema.findOneAndDelete({rollNo:req.body.rollNo}).then(val=>{
       let arr = val.data;
-      let obj = {taskId:data._id,taskTopic:data.taskTopic,uploadTime:data.uploadTime,Score:null};
+      let obj = {taskId:data._id,taskTopic:data.topic,uploadTime:data.uploadTime,Score:null};
       arr.push(obj);
       new scoreSchema({rollNo:req.body.rollNo,data:arr}).save().then(()=>res.status(201).send("Task created."))
     })
@@ -44,7 +45,11 @@ router.get('/alltasks',(req,res)=>{
 })
 
 router.get('/allscores',(req,res)=>{
-  scoreSchema.findOne({rollNo:req.query.rollNo}).then(score=>res.status(200).json({data:score.data})).catch(err=>res.status(400).json(err));
+  scoreSchema.findOne({rollNo:req.query.rollNo}).then(score=>{
+    sortArray(score.data);
+    console.log(score.data)
+    return res.status(200).json({data:score.data})
+  }).catch(err=>res.status(500).json(err));
 })
 
 
@@ -62,9 +67,9 @@ router.post('/uploadtask',(req,res)=>{
       var newpath = './public/tasks/' + req.query.rollNo + 'ml' + Date.parse(new Date()) + '.' + ext ;
       fs.rename(oldpath, newpath, function (err) {
         if (err) throw err;
-        taskSchema.findOneAndDelete({id:fields.taskId}).then((data)=>{
-          let obj = {feedback:fields.feedback,url:newpath.slice(8),timeStamp:createTimeStamp()};
-          new taskSchema({_id:data._id,taskType:fields.taskType,rollNo:req.query.rollNo,topic:fields.topic,attachment:obj,uploadTime:data.uploadTime,deadline:data.deadline,score:null}).save().then(()=>res.status(200).send("Task submitted."))
+        taskSchema.findOneAndDelete({_id:mongoose.Types.ObjectId(fields.taskId)}).then((data)=>{
+          let obj = {feedback:fields.feedback,url:newpath.slice(8),timeStamp:createTimeStamp(),Score:null};
+          new taskSchema({_id:data._id,taskType:fields.taskType,rollNo:req.query.rollNo,topic:fields.topic,attachment:obj,uploadTime:data.uploadTime,deadline:data.deadline}).save().then(()=>res.status(200).send("Task submitted."))
           .catch(err=>res.status(500).json(err));
           })
         });
@@ -74,30 +79,37 @@ router.post('/uploadtask',(req,res)=>{
     else{
       var form = new formidable.IncomingForm();
       form.parse(req, function (err, fields, files){
-        taskSchema.findOneAndDelete({topic:fields.taskId}).then(data=>{
-          scoreSchema.findOneAndDelete({rollNo:req.query.rollNo}).then(val=>{
-            let scoreArray = val.data;
-            let ind;
-            scoreArray.map((val,index)=>{
-              if(val.taskId===fields.taskId){
-                ind=index;
-              }
-            })
-            scoreArray.splice(ind,1);
-            scoreArray.push({taskId:data._id,taskTopic:data.taskTopic,uploadTime:data.uploadTime,score:null})
-            new scoreSchema({_id:val._id,rollNo:req.query.rollNo,data:scoreArray}).save();
-          })
+        taskSchema.findOneAndDelete({_id:mongoose.Types.ObjectId(fields.taskId)}).then(data=>{
+            let ind,scoreArray,score,att;
+            scoreSchema.findOne({rollNo:req.query.rollNo}).then(d=>{
+              scoreArray = d.data;
+              scoreArray.map((dt,i)=>{
+                if(dt.taskId == fields.taskId)
+                {
+                  ind = i;
+                  score = dt;
+                }
+              })
+            }).then(()=>{
+
+              scoreArray.splice(ind,1);
+              scoreArray.push({taskId:score.taskId,taskTopic:score.taskTopic,uploadTime:score.uploadTime, Score:null});
+              scoreSchema.findOneAndUpdate({rollNo:req.query.rollNo},
+                {'data':scoreArray},
+                {new : true}
+              ).then(()=>{return;})
+            });
+
           let id = data._id;
           let attachment = data.attachment;
-          let ind;
           let uploadedTime = data.uploadTime;
           let setDeadline = data.deadline;
-              fs.unlink('./public'+data.attachment.url, function (err) {
-                if (err) throw err;
-                console.log('File deleted!');
-              });
+            fs.unlink('./public'+data.attachment.url, function (err) {
+              if (err) throw err;
+              console.log('File deleted!');
+            });
 
-          new taskSchema({_id:data._id,taskType:fields.taskType,topic:fields.topic,attachment:null,uploadTime:uploadedTime,deadline:setDeadline,rollNo:req.query.rollNO}).save().then(()=>res.status(200).send("Task submission cleared"))
+          new taskSchema({_id:mongoose.Types.ObjectId(fields.taskId),taskType:fields.taskType,topic:fields.topic,attachment:null,uploadTime:uploadedTime,deadline:setDeadline,rollNo:req.query.rollNo}).save().then(()=>res.status(200).send("Task submission cleared"))
           .catch(err=>res.status(500).json(err));
       })
     })
@@ -105,14 +117,17 @@ router.post('/uploadtask',(req,res)=>{
 })
 
 router.get('/removetask',(req,res)=>{
-  if(!req.query.taskId){
+  if(!mongoose.Types.ObjectId(req.query.taskId)){
     res.status(400).send("Bad request");
   }
-  taskSchema.findOneAndDelete({_id:req.query.taskId}).then(val=>{
-      fs.unlink('./public'+val.attachment.url, function (err) {
-        if (err) throw err;
-        console.log('File deleted!');
-      });
+  taskSchema.findOneAndDelete({_id:mongoose.Types.ObjectId(req.query.taskId)}).then(val=>{
+    if(!val.attachment || val.attachment === null)
+      {
+        fs.unlink('./public'+val.attachment.url, function (err) {
+          if (err) throw err;
+          console.log('File deleted!');
+        });
+      }
   }).then(()=>res.status(200).send("Task removed")).catch(err=>res.json(err))
 })
 
@@ -121,33 +136,50 @@ router.post('/modifytask',(req,res)=>{
   if(!req.query.taskId){
     res.status(400).send("Bad request");
   }
-  taskSchema.findOneAndDelete({_id:req.query.taskId}).then(data=>{
+  taskSchema.findOneAndDelete({_id:mongoose.Types.ObjectId(req.query.taskId)}).then(data=>{
     new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time,attachment:data.attachment,rollNo:req.body.rollNo}).save().then(()=>res.status(201).send("Task modified."))
     .catch(err=>res.status(500).json(err));
   })
 })
 
-
-
 router.post('/gradetask',(req,res)=>{
   if(!req.query.taskId || !req.query.rollNo){
     res.status(400).send("Bad request");
   }
-  scoreSchema.findOneAndDelete({rollNo:req.query.rollNo}).then(value=>{
-    let scoreArray=value.data;
-    scoreArray.map((data,index)=>{
-          if(data.taskId===req.query.taskId){
-            let up = data.uploadTime;
-            let tt = data.taskTopic;
-            scoreArray.splice(index,1);
-          }
-        })
-      scoreArray.push({uploadTime:up,taskType:tt,score:req.query.score,taskId:req.query.taskId});
-    }
-  )
+    let ind,scoreArray,score,att;
+    scoreSchema.findOne({rollNo:req.query.rollNo}).then(d=>{
+      scoreArray = d.data;
+      scoreArray.map((dt,i)=>{
+        if(dt.taskId == req.query.taskId)
+        {
+          ind = i;
+          score = dt;
+        }
+      })
+    }).then(()=>{
 
-  new scoreSchema({_id:value._id,data:scoreArray}).save().then(()=>res.status(200).send("Scores Updated"))
-  .catch(err=>res.json(err));
+      scoreArray.splice(ind,1);
+      scoreArray.push({taskId:score.taskId,taskTopic:score.taskTopic,uploadTime:score.uploadTime, Score:req.body.Score});
+      scoreSchema.findOneAndUpdate({rollNo:req.query.rollNo},
+        {'data':scoreArray},
+        {new : true}
+      ).then(()=>{
+        taskSchema.findOne({_id:score.taskId}).then(v=>{
+          v.attachment.Score=req.body.Score;
+          att = v.attachment;
+        }).then(()=>{
+
+          taskSchema.findOneAndUpdate({_id:score.taskId},
+            {'attachment':att},
+            {new : true}
+          ).then(res=>{return;})
+        })
+      })
+
+    }).then(()=>res.status(200).json({success:true,msg:"Graded task"}))
+    .catch((err) => res.status(500).json(err))
+
+
 
 })
 

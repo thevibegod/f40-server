@@ -10,20 +10,23 @@ function convertDate(timestamp){
 }
 
 function compare(a, b) {
-  const dateA = convertDate(a.timestamp);
-  const dateB = convertDate(b.timestamp);
+  const dateA = convertDate(a.uploadTime);
+  const dateB = convertDate(b.uploadTime);
 	const val = dateA - dateB;
   let comparison = 0;
-  if (val > 0) {
+  if (val < 0) {
     comparison = 1;
-  } else if (val < 0) {
+  } else if (val > 0) {
     comparison = -1;
   }
   return comparison;
 }
 
 const sortArray =(arr)=>{
-  arr.sort(compare);
+  console.log(arr)
+    arr.sort(compare);
+
 }
+
 
 module.exports = sortArray;
