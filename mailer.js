@@ -35,7 +35,7 @@ const initializeMailer = () =>{
 
 const sendMail = (mailer,options) =>{
   const mailOptions = {
-       from: "contact.f40.ece@gmail.com",
+       from: "F40 LMS <contact.f40.ece@gmail.com>",
        to: options.receiver,
        subject: options.subject,
        text:options.message,

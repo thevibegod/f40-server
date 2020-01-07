@@ -30,7 +30,8 @@ router.post('/addtask',(req,res)=>{
   if(!req.body.topic || !req.body.taskType ||!req.body.rollNo){
     res.status(400).send("Bad Request");
   }
-  new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time,rollNo:req.body.rollNo,attachment:null}).save().then((data)=>{
+  let day = req.body.date.slice(8,10), month = req.body.date.slice(5,7) , year = req.body.date.slice(0,4);
+  new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:day+'/'+month+'/'+year+' '+req.body.time+':00',rollNo:req.body.rollNo,attachment:null}).save().then((data)=>{
     scoreSchema.findOneAndDelete({rollNo:req.body.rollNo}).then(val=>{
       let arr = val.data;
       let obj = {taskId:data._id,taskTopic:data.topic,uploadTime:data.uploadTime,Score:null};
@@ -168,8 +169,9 @@ router.post('/modifytask',(req,res)=>{
   if(!req.query.taskId){
     res.status(400).send("Bad request");
   }
+  let day = req.body.date.slice(8,10), month = req.body.date.slice(5,7) , year = req.body.date.slice(0,4);
   taskSchema.findOneAndDelete({_id:mongoose.Types.ObjectId(req.query.taskId)}).then(data=>{
-    new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time,attachment:data.attachment,rollNo:req.body.rollNo}).save().then(()=>res.status(201).send("Task modified."))
+    new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:day+'/'+month+'/'+year+' '+req.body.time+':00',attachment:data.attachment,rollNo:req.body.rollNo}).save().then(()=>res.status(201).send("Task modified."))
     .catch(err=>res.status(500).json(err));
   }).then(()=>{
     profileSchema.findOne({rollNo:req.query.rollNo}).then((user)=>{
