@@ -5,6 +5,11 @@ var router = require("express").Router();
 var formidable = require('formidable');
 var fs = require('fs');
 var sortArray = require('../sort');
+const mailer = require('../mailer').initializeMailer;
+const mailerObj = mailer();
+const sendMail = require('../mailer').sendMail;
+const profileSchema = require('../models/profileSchema');
+
 
 var createTimeStamp = ()=> {
   dateObj = new Date();
@@ -30,7 +35,19 @@ router.post('/addtask',(req,res)=>{
       let arr = val.data;
       let obj = {taskId:data._id,taskTopic:data.topic,uploadTime:data.uploadTime,Score:null};
       arr.push(obj);
-      new scoreSchema({rollNo:req.body.rollNo,data:arr}).save().then(()=>res.status(201).send("Task created."))
+      new scoreSchema({rollNo:req.body.rollNo,data:arr}).save()
+      .then(()=>{
+        profileSchema.findOne({rollNo:req.body.rollNo}).then((user)=>{
+          const options ={
+            receiver:user.mailId,
+            subject:"New Task - F40",
+            message:`A new task has been assigned to you on ${data.uploadTime}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
+          }
+          sendMail(mailerObj,options);
+        })
+      })
+
+      .then(()=>res.status(201).send("Task created."))
     })
   .catch(err=>res.status(500).json(err));
 

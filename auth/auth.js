@@ -7,19 +7,10 @@ const generateToken = user => {
 };
 
 const validateMiddleware = (req, res, next) => {
-  let token = req.headers["x-access-token"];
-  let token2 = req.body.token;
-  if (!token && !token2) res.status(403).json({ success: false, msg: "Not logged in" });
-  else if(!token2){
+  let token = req.headers["x-access-token"]
+  if (!token) res.status(403).json({ success: false, msg: "Not logged in" });
+  else {
     jwt.verify(token, config.secret, (err, decoded) => {
-      if (err) res.status(403).json({ success: false, msg: "Invalid Token" });
-      else {
-        req.loggedInUser = decoded;
-        next();
-      }
-    });
-  }else{
-    jwt.verify(token2, config.secret, (err, decoded) => {
       if (err) res.status(403).json({ success: false, msg: "Invalid Token" });
       else {
         req.loggedInUser = decoded;
