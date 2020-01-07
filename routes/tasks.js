@@ -47,7 +47,6 @@ router.get('/alltasks',(req,res)=>{
 router.get('/allscores',(req,res)=>{
   scoreSchema.findOne({rollNo:req.query.rollNo}).then(score=>{
     sortArray(score.data);
-    console.log(score.data)
     return res.status(200).json({data:score.data})
   }).catch(err=>res.status(500).json(err));
 })
@@ -143,14 +142,15 @@ router.post('/modifytask',(req,res)=>{
 })
 
 router.post('/gradetask',(req,res)=>{
-  if(!req.query.taskId || !req.query.rollNo){
+  if(!req.body.taskId || !req.query.rollNo){
     res.status(400).send("Bad request");
   }
+    console.log(req.body)
     let ind,scoreArray,score,att;
     scoreSchema.findOne({rollNo:req.query.rollNo}).then(d=>{
       scoreArray = d.data;
       scoreArray.map((dt,i)=>{
-        if(dt.taskId == req.query.taskId)
+        if(dt.taskId == req.body.taskId)
         {
           ind = i;
           score = dt;
@@ -160,6 +160,7 @@ router.post('/gradetask',(req,res)=>{
 
       scoreArray.splice(ind,1);
       scoreArray.push({taskId:score.taskId,taskTopic:score.taskTopic,uploadTime:score.uploadTime, Score:req.body.Score});
+      console.log(scoreArray)
       scoreSchema.findOneAndUpdate({rollNo:req.query.rollNo},
         {'data':scoreArray},
         {new : true}

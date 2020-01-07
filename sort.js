@@ -23,9 +23,7 @@ function compare(a, b) {
 }
 
 const sortArray =(arr)=>{
-  console.log(arr)
     arr.sort(compare);
-
 }
 
 
