@@ -44,8 +44,7 @@ router.get("/removenotification", (req, res) => {
   if (!req.query.title) {
     return res.status(400).json({ success: false, msg: "Bad Request" });
   }
-  notificationSchema
-    .findOneAndDelete({ title: req.query.title })
+  notificationSchema.findOneAndDelete({ title: req.query.title })
     .then(() =>
       res
         .status(200)
@@ -57,8 +56,7 @@ router.post("/notificationupdation", (req, res) => {
   if (!req.body.title) {
     return res.status(400).json({ success: false, msg: "Bad Request" });
   }
-  notificationSchema
-    .findOneAndDelete({ title: req.body.title })
+  notificationSchema.findOneAndDelete({ title: req.body.title })
     .then(() => {
       const newnotification = new notificationSchema({
         title: req.body.title,

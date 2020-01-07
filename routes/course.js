@@ -31,7 +31,7 @@ router.post('/addcourse',(req, res)=>{
     }
     courseSchema.findOne({title:req.query.title}).then(data=>{
         return res.status(200).json(data)
-      })
+      }).catch((err)=>console.log(err))
     })
 
     router.get('/removecourse',(req,res)=>{
