@@ -12,6 +12,16 @@ const taskRouter = require("./routes/tasks");
 const menteeProfileRouter = require("./routes/menteeProfiles");
 const auth = require("./auth/auth");
 const app = express();
+// const mailer = require('./mailer').initializeMailer;
+// const mailerObj = mailer();
+// const sendMail = require('./mailer').sendMail;
+
+// const options ={
+//   receiver:"contact.f40.ece@kct.ac.in",
+//   subject:"Hello world",
+//   message:"The server has begun to run."
+// }
+// sendMail(mailerObj,options);
 
 app.options('*', cors())
 app.use(cors());
@@ -32,9 +42,7 @@ app.use(bodyParser.urlencoded({extended: true, limit: '100mb' }));
 connectDB();
 app.set("view engine", "ejs");
 
-// fetch user and test password verification
 app.post("/validateuser", (req, res) => {
-
   require("./models/UserSchema").findOne(
     { username: req.body.username },
 

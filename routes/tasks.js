@@ -5,6 +5,11 @@ var router = require("express").Router();
 var formidable = require('formidable');
 var fs = require('fs');
 var sortArray = require('../sort');
+const mailer = require('../mailer').initializeMailer;
+const mailerObj = mailer();
+const sendMail = require('../mailer').sendMail;
+const UserSchema = require('../models/UserSchema');
+
 
 var createTimeStamp = ()=> {
   dateObj = new Date();
@@ -25,12 +30,25 @@ router.post('/addtask',(req,res)=>{
   if(!req.body.topic || !req.body.taskType ||!req.body.rollNo){
     res.status(400).send("Bad Request");
   }
+  let receiver;
   new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time,rollNo:req.body.rollNo,attachment:null}).save().then((data)=>{
     scoreSchema.findOneAndDelete({rollNo:req.body.rollNo}).then(val=>{
       let arr = val.data;
       let obj = {taskId:data._id,taskTopic:data.topic,uploadTime:data.uploadTime,Score:null};
       arr.push(obj);
-      new scoreSchema({rollNo:req.body.rollNo,data:arr}).save().then(()=>res.status(201).send("Task created."))
+      new scoreSchema({rollNo:req.body.rollNo,data:arr}).save()
+      .then(()=>{
+        UserSchema.findOne({username:req.body.rollNo}).then((user)=>{
+          const options ={
+            receiver:user.rollNo,
+            subject:"New Task - F40",
+            message:`A new task has been assigned to you on ${data.uploadTime}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
+          }
+          sendMail(mailerObj,options);
+        })
+      })
+
+      .then(()=>res.status(201).send("Task created."))
     })
   .catch(err=>res.status(500).json(err));
 
