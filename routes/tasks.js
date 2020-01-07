@@ -8,11 +8,7 @@ var sortArray = require('../sort');
 const mailer = require('../mailer').initializeMailer;
 const mailerObj = mailer();
 const sendMail = require('../mailer').sendMail;
-<<<<<<< HEAD
 const profileSchema = require('../models/profileSchema');
-=======
-const UserSchema = require('../models/UserSchema');
->>>>>>> 81703a2817581a93e96d342ba2fecd88d55db899
 
 
 var createTimeStamp = ()=> {
@@ -34,7 +30,6 @@ router.post('/addtask',(req,res)=>{
   if(!req.body.topic || !req.body.taskType ||!req.body.rollNo){
     res.status(400).send("Bad Request");
   }
-  let receiver;
   new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time,rollNo:req.body.rollNo,attachment:null}).save().then((data)=>{
     scoreSchema.findOneAndDelete({rollNo:req.body.rollNo}).then(val=>{
       let arr = val.data;
@@ -42,15 +37,9 @@ router.post('/addtask',(req,res)=>{
       arr.push(obj);
       new scoreSchema({rollNo:req.body.rollNo,data:arr}).save()
       .then(()=>{
-<<<<<<< HEAD
         profileSchema.findOne({rollNo:req.body.rollNo}).then((user)=>{
           const options ={
             receiver:user.mailId,
-=======
-        UserSchema.findOne({username:req.body.rollNo}).then((user)=>{
-          const options ={
-            receiver:user.rollNo,
->>>>>>> 81703a2817581a93e96d342ba2fecd88d55db899
             subject:"New Task - F40",
             message:`A new task has been assigned to you on ${data.uploadTime}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
           }
@@ -96,7 +85,16 @@ router.post('/uploadtask',(req,res)=>{
         if (err) throw err;
         taskSchema.findOneAndDelete({_id:mongoose.Types.ObjectId(fields.taskId)}).then((data)=>{
           let obj = {feedback:fields.feedback,url:newpath.slice(8),timeStamp:createTimeStamp(),Score:null};
-          new taskSchema({_id:data._id,taskType:fields.taskType,rollNo:req.query.rollNo,topic:fields.topic,attachment:obj,uploadTime:data.uploadTime,deadline:data.deadline}).save().then(()=>res.status(200).send("Task submitted."))
+          new taskSchema({_id:data._id,taskType:fields.taskType,rollNo:req.query.rollNo,topic:fields.topic,attachment:obj,uploadTime:data.uploadTime,deadline:data.deadline}).save().then(()=>res.status(200).send("Task submitted.")).then(()=>{
+            profileSchema.findOne({rollNo:req.query.rollNo}).then((user)=>{
+              const options ={
+                receiver:user.studentMentorMail,
+                subject:"Task submission - F40",
+                message:`${user.name} (${user.rollNo}) has submitted an attachment for task ${fields.topic} on ${obj.timeStamp}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
+              }
+              sendMail(mailerObj,options);
+            })
+          })
           .catch(err=>res.status(500).json(err));
           })
         });
