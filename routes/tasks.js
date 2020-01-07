@@ -41,7 +41,7 @@ router.post('/addtask',(req,res)=>{
           const options ={
             receiver:user.mailId,
             subject:"New Task - F40",
-            message:`A new task has been assigned to you on ${data.uploadTime}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
+            message:`A new task with topic: ${data.topic} has been assigned to you on ${data.uploadTime}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
           }
           sendMail(mailerObj,options);
         })
@@ -89,7 +89,7 @@ router.post('/uploadtask',(req,res)=>{
             profileSchema.findOne({rollNo:req.query.rollNo}).then((user)=>{
               const options ={
                 receiver:user.studentMentorMail,
-                subject:"Task submission - F40",
+                subject:`Task Submitted by ${user.rollNo} - F40`,
                 message:`${user.name} (${user.rollNo}) has submitted an attachment for task ${fields.topic} on ${obj.timeStamp}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
               }
               sendMail(mailerObj,options);
@@ -122,7 +122,14 @@ router.post('/uploadtask',(req,res)=>{
               scoreSchema.findOneAndUpdate({rollNo:req.query.rollNo},
                 {'data':scoreArray},
                 {new : true}
-              ).then(()=>{return;})
+              ).then(()=>{profileSchema.findOne({rollNo:req.query.rollNo}).then((user)=>{
+                const options ={
+                  receiver:user.studentMentorMail,
+                  subject:`Task Cleared by ${user.rollNo} - F40`,
+                  message:`${user.name} (${user.rollNo}) has cleared the attachment for task ${fields.topic} and the student's score has been reset.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
+                }
+                sendMail(mailerObj,options);
+              })})
             });
 
           let id = data._id;
@@ -164,6 +171,15 @@ router.post('/modifytask',(req,res)=>{
   taskSchema.findOneAndDelete({_id:mongoose.Types.ObjectId(req.query.taskId)}).then(data=>{
     new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:req.body.date+' '+req.body.time,attachment:data.attachment,rollNo:req.body.rollNo}).save().then(()=>res.status(201).send("Task modified."))
     .catch(err=>res.status(500).json(err));
+  }).then(()=>{
+    profileSchema.findOne({rollNo:req.query.rollNo}).then((user)=>{
+      const options ={
+        receiver:user.mailId,
+        subject:"Task Deadline Extended - F40",
+        message:`The deadline for the task ${req.body.topic} has been extended till ${req.body.date+' '+req.body.time}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
+      }
+      sendMail(mailerObj,options);
+    })
   })
 })
 
@@ -171,6 +187,7 @@ router.post('/gradetask',(req,res)=>{
   if(!req.body.taskId || !req.query.rollNo){
     res.status(400).send("Bad request");
   }
+  let v;
     console.log(req.body)
     let ind,scoreArray,score,att;
     scoreSchema.findOne({rollNo:req.query.rollNo}).then(d=>{
@@ -203,7 +220,17 @@ router.post('/gradetask',(req,res)=>{
         })
       })
 
-    }).then(()=>res.status(200).json({success:true,msg:"Graded task"}))
+    }).then(()=>{
+      profileSchema.findOne({rollNo:req.query.rollNo}).then((user)=>{
+        const options ={
+          receiver:user.mailId,
+          subject:`Task Graded - F40`,
+          message:`Your attachment for the task ${v.topic}is graded.You have scored ${req.body.Score}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
+        }
+        sendMail(mailerObj,options);
+      })
+    })
+    .then(()=>res.status(200).json({success:true,msg:"Graded task"}))
     .catch((err) => res.status(500).json(err))
 
 
