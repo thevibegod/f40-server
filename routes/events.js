@@ -35,17 +35,6 @@ router.post('/addevent',(req, res)=>{
 
 });
 
-// router.get('/eventpicture',(req,res)=>{
-//   if(!req.query.title){
-//     return res.status(400).send("Bad Request.")
-//   }
-//   eventSchema.findOne({title:req.query.title}).then(data=>{
-//     gfs.files.findOne({_id:data.id},(err,file)=>{
-//       const readStream = gfs.createReadStream(file.filename);
-//       readStream.pipe(res);
-//     })
-//   })})
-
   router.get('/eventdetails',(req,res)=>{
     if(!req.query.title){
       return res.status(400).send("Bad Request.")
