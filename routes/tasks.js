@@ -171,14 +171,14 @@ router.post('/modifytask',(req,res)=>{
   }
   let day = req.body.date.slice(8,10), month = req.body.date.slice(5,7) , year = req.body.date.slice(0,4);
   taskSchema.findOneAndDelete({_id:mongoose.Types.ObjectId(req.query.taskId)}).then(data=>{
-    new taskSchema({taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:day+'/'+month+'/'+year+' '+req.body.time+':00',attachment:data.attachment,rollNo:req.body.rollNo}).save().then(()=>res.status(201).send("Task modified."))
+    new taskSchema({_id:mongoose.Types.ObjectId(req.query.taskId),taskType:req.body.taskType,topic:req.body.topic,uploadTime:createTimeStamp(),deadline:day+'/'+month+'/'+year+' '+req.body.time+':00',attachment:data.attachment,rollNo:req.body.rollNo}).save().then(()=>res.status(201).send("Task modified."))
     .catch(err=>res.status(500).json(err));
   }).then(()=>{
     profileSchema.findOne({rollNo:req.query.rollNo}).then((user)=>{
       const options ={
         receiver:user.mailId,
         subject:"Task Deadline Extended - F40",
-        message:`The deadline for the task ${req.body.topic} has been extended till ${req.body.date+' '+req.body.time}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
+        message:`The deadline for the task ${req.body.topic} has been changed to ${day+'/'+month+'/'+year+' '+req.body.time+':00'}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
       }
       sendMail(mailerObj,options);
     })
@@ -189,9 +189,7 @@ router.post('/gradetask',(req,res)=>{
   if(!req.body.taskId || !req.query.rollNo){
     res.status(400).send("Bad request");
   }
-  let v;
-    console.log(req.body)
-    let ind,scoreArray,score,att;
+    let v,ind,scoreArray,score,att;
     scoreSchema.findOne({rollNo:req.query.rollNo}).then(d=>{
       scoreArray = d.data;
       scoreArray.map((dt,i)=>{
@@ -205,32 +203,30 @@ router.post('/gradetask',(req,res)=>{
 
       scoreArray.splice(ind,1);
       scoreArray.push({taskId:score.taskId,taskTopic:score.taskTopic,uploadTime:score.uploadTime, Score:req.body.Score});
-      console.log(scoreArray)
       scoreSchema.findOneAndUpdate({rollNo:req.query.rollNo},
         {'data':scoreArray},
         {new : true}
       ).then(()=>{
-        taskSchema.findOne({_id:score.taskId}).then(v=>{
-          v.attachment.Score=req.body.Score;
-          att = v.attachment;
+        taskSchema.findOne({_id:score.taskId}).then(va=>{
+          v = va;
+          va.attachment.Score=req.body.Score;
+          att = va.attachment;
         }).then(()=>{
 
           taskSchema.findOneAndUpdate({_id:score.taskId},
             {'attachment':att},
             {new : true}
-          ).then(res=>{return;})
+          ).then(res=>{profileSchema.findOne({rollNo:req.query.rollNo}).then((user)=>{
+            const options ={
+              receiver:user.mailId,
+              subject:`Task Graded - F40`,
+              message:`Your attachment for the task ${v.topic} is graded.You have scored ${req.body.Score}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
+            }
+            sendMail(mailerObj,options);
+          })})
         })
       })
 
-    }).then(()=>{
-      profileSchema.findOne({rollNo:req.query.rollNo}).then((user)=>{
-        const options ={
-          receiver:user.mailId,
-          subject:`Task Graded - F40`,
-          message:`Your attachment for the task ${v.topic}is graded.You have scored ${req.body.Score}.Kindly visit https://google.co.in to know more details. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
-        }
-        sendMail(mailerObj,options);
-      })
     })
     .then(()=>res.status(200).json({success:true,msg:"Graded task"}))
     .catch((err) => res.status(500).json(err))
