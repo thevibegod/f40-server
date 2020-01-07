@@ -37,5 +37,23 @@ router.post('/postattendance',(req,res)=>{
 
 })
 
+router.post('/changeattendance',(req,res)=>{
+  if(!req.query.rollNo || !req.body.date || !req.body.value)
+  {
+    return res.status(400).json({success:false,msg:"Bad Request"})
+  }
+  attendanceSchema.findOne({rollNo:req.query.rollNo}).then(data=>{
+    let arr = data.dates,ind;
+    arr.map((d,i)=>{
+      if(d.date===req.body.date){
+        d["value"]=req.body.value
+      }
+    });
+    attendanceSchema.findOneAndUpdate({rollNo:req.query.rollNo},{dates:arr},{new:true}).then(()=>{
+      return res.status(200).json({success:true,msg:"Attendance Updated"})
+    })
+  })
+})
+
 
 module.exports=router;
