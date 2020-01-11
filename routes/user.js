@@ -67,4 +67,18 @@ router.get("/students",(req,res)=>{
   })).then(()=>res.json(arr)).catch(err=>res.json(err))
 })
 
+router.get("/studentmentors",(req,res)=>{
+  let arr = [];
+  UserSchema.find({type:"student-mentor"}).sort({rollNo:1}).then((data)=>data.map(user=>{
+    arr.push(user.username);
+  })).then(()=>res.json(arr)).catch(err=>res.json(err))
+})
+
+router.get("/facultymentors",(req,res)=>{
+  let arr = [];
+  UserSchema.find({type:"faculty-mentor"}).sort({rollNo:1}).then((data)=>data.map(user=>{
+    arr.push(user.username);
+  })).then(()=>res.json(arr)).catch(err=>res.json(err))
+})
+
 module.exports = router;

@@ -67,7 +67,7 @@ router.post("/addmentee", (req, res) => {
 });
 
 router.post("/removementee", (req, res) => {
-  if (!req.query.rollNo || !req.body.id) {
+  if (!req.query.rollNo || req.body.id === null) {
     return res.status(400).json({ success: false, msg: "Bad request" });
   }
   mentorProfileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
@@ -130,8 +130,7 @@ router.post("/mentorprofiledetailsupdation",(req, res) => {
         fs.unlink('./public'+data.id, function (err) {
           if (err) throw err;
           console.log('File deleted!');
-        });
-      })
+        })
       .then(() => {
         var oldpath = files.attachment.path;
         var ext = files.attachment.name.split('.')[1];
@@ -141,7 +140,7 @@ router.post("/mentorprofiledetailsupdation",(req, res) => {
         const newProfile = new mentorProfileSchema({
           name: fields.name,
           mailId:fields.mailId,
-          id: files.id,
+          id: newpath.slice(8),
           batch: fields.batch,
           rollNo: fields.rollNo,
           mentees:data.mentees
@@ -149,10 +148,11 @@ router.post("/mentorprofiledetailsupdation",(req, res) => {
         newProfile.save();
       })
     })
+  })
       .then(() =>
         res.status(201).json({ success: true, msg: "Profile updated" })
       )
-      .catch(err => res.ststus(400).json({ success: false}));
+      .catch(err =>{console.log(err) ;res.status(400).json({ success: false})});
   })
     })
 module.exports = router;

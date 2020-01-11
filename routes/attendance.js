@@ -38,7 +38,7 @@ router.post('/postattendance',(req,res)=>{
 })
 
 router.post('/changeattendance',(req,res)=>{
-  if(!req.query.rollNo || !req.body.date || !req.body.value)
+  if(!req.query.rollNo || !req.body.date || req.body.value === null)
   {
     return res.status(400).json({success:false,msg:"Bad Request"})
   }
