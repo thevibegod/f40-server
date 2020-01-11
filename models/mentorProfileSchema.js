@@ -20,8 +20,7 @@ let menteeProfileSchema = new Schema({
     required: true
   },
   batch: {
-    type: String,
-    required: true
+    type: String
   },
   mentees:{
     type:Array,

@@ -3,6 +3,8 @@ var router = express.Router();
 var scoreSchema = require("../models/scoreSchema");
 var mongoose = require("mongoose");
 var profileSchema = require("../models/profileSchema");
+var attendanceSchema = require('../models/attendanceSchema');
+var userSchema = require("../models/UserSchema");
 var formidable = require('formidable');
 var fs = require('fs');
 var connStr =
@@ -28,6 +30,7 @@ router.post("/addprofile", (req, res) => {
     var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
     fs.rename(oldpath, newpath, function (err) {
       if (err) throw err;
+      new userSchema({username:fields.rollNo,password:fields.rollNo,type:"student"}).save();
       const newProfile = new profileSchema({
         name: fields.name,
         mailId:fields.mailId,
@@ -43,11 +46,12 @@ router.post("/addprofile", (req, res) => {
       });
       newProfile
         .save()
-        .then(()=>new scoreSchema({rollNo:fields.rollNo}).save())
-        .then(() =>
+        .then(()=>new scoreSchema({rollNo:fields.rollNo}).save().then(()=>new attendanceSchema({rollNo:fields.rollNo,dates:[]}).save()).then(() =>
           res.status(201).json({ success: true, msg: "Added Profile to db" })
-        )
-        .catch(err => res.json({ sucess: false, err }));
+        ).catch(err => res.json({ sucess: false, err })));
+
+
+
       });
     })
 
@@ -163,7 +167,7 @@ router.post("/studentprofiledetailsupdation",(req, res) => {
       return res.status(400).json({ success: false, msg: "Bad Request" });
     }
     profileSchema
-      .findOneAndDelete({ rollNo: fields.rollNo })
+      .findOne({ rollNo: fields.rollNo })
       .then(data => {
         fs.unlink('./public'+data.id, function (err) {
           if (err) throw err;
@@ -179,7 +183,7 @@ router.post("/studentprofiledetailsupdation",(req, res) => {
         const newProfile = new profileSchema({
           name: fields.name,
           mailId:fields.mailId,
-          id: files.id,
+          id: newpath.slice(8),
           batch: fields.batch,
           studentMentorName: fields.studentMentorName,
           studentMentorMail: fields.studentMentorMail,

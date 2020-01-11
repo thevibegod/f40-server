@@ -13,6 +13,8 @@ const menteeProfileRouter = require("./routes/menteeProfiles");
 const auth = require("./auth/auth");
 const app = express();
 const path = require('path');
+
+
 // const mailer = require('./mailer').initializeMailer;
 // const mailerObj = mailer();
 // const sendMail = require('./mailer').sendMail;
@@ -32,16 +34,16 @@ app.use(express.static('public/f40-sm'));
 app.use(express.static('public/f40-fm'));
 app.use(express.static('public/admin'));
 app.get('/f40/*', (req,res) =>{
-    res.sendFile(path.join(__dirname+'/f40/index.html'));
+    res.sendFile(path.join(__dirname,'public','/f40/index.html'));
 });
 app.get('/f40-sm/*', (req,res) =>{
-    res.sendFile(path.join(__dirname+'/f40-sm/index.html'));
+    res.sendFile(path.join(__dirname,'public','/f40-sm/index.html'));
 });
 app.get('/f40-fm/*', (req,res) =>{
-    res.sendFile(path.join(__dirname+'/f40-fm/index.html'));
+    res.sendFile(path.join(__dirname,'public','/f40-fm/index.html'));
 });
 app.get('/admin/*', (req,res) =>{
-    res.sendFile(path.join(__dirname+'/admin/index.html'));
+    res.sendFile(path.join(__dirname,'public','/admin/index.html'));
 });
 app.use(function(req, res, next) {
   res.setHeader('Access-Control-Expose-Headers', 'Access-Control-*, Origin, X-Requested-With, Content-Type, Accept, Authorization');
