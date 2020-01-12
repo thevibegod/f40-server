@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const path = require("path");
+const otplib = require('otplib');
 const generateToken = user => {
   return jwt.sign({user} , process.env.JWT_SECRET, {
     expiresIn: "24h"
@@ -19,4 +20,8 @@ const validateMiddleware = (req, res, next) => {
     });
   }
 };
-module.exports = { generateToken, validateMiddleware };
+
+
+const generateOTP = (secret) => otplib.authenticator.generate(secret);
+
+module.exports = { generateToken, validateMiddleware , generateOTP};

@@ -6,7 +6,8 @@ var mongoose = require('mongoose'),
 var UserSchema = new Schema({
     username: { type: String, required: true,  unique: true },
     password: { type: String, required: true },
-    type:{type:String,required:true}
+    type:{type:String,required:true},
+    otpData:{OTP:String,time:String}
 });
 
 
