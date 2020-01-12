@@ -71,7 +71,7 @@ app.use(bodyParser.urlencoded({extended: true, limit: '100mb' }));
 
 connectDB();
 
-app.post('/otprequest',(req,res)=>{
+app.post('/otprequestmentor',(req,res)=>{
   if(!req.body.username){
     return res.status(400).json({success:false,msg:"Invalid User"});
   }
