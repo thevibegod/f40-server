@@ -2,7 +2,7 @@ var UserSchema = require("../models/UserSchema");
 var mongoose = require("mongoose");
 var router = require("express").Router();
 var connStr =
-  "mongodb+srv://adarsh18bec095:Adarsh123@f40cluster-wugpz.mongodb.net/test?retryWrites=true&w=majority";
+  process.env.DB_URL;
 mongoose.connect(connStr, function(err) {
   if (err) throw err;
   console.log("Successfully connected to MongoDB");
@@ -24,7 +24,6 @@ router.post("/createuser", (req, res) => {
     type:req.body.type
   });
 
-  // save user to database
   testUser
     .save()
     .then(()=>res.status(201).json({ success: true, msg: "User Created" }))

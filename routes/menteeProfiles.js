@@ -6,7 +6,7 @@ var mentorProfileSchema = require("../models/mentorProfileSchema");
 var formidable = require('formidable');
 var fs = require('fs');
 var connStr =
-  "mongodb+srv://adarsh18bec095:Adarsh123@f40cluster-wugpz.mongodb.net/test?retryWrites=true&w=majority";
+process.env.DB_URL;
 mongoose.connect(connStr, function(err) {
   if (err) throw err;
   console.log("Successfully connected to MongoDB");

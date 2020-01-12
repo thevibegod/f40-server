@@ -8,7 +8,7 @@ var userSchema = require("../models/UserSchema");
 var formidable = require('formidable');
 var fs = require('fs');
 var connStr =
-  "mongodb+srv://adarsh18bec095:Adarsh123@f40cluster-wugpz.mongodb.net/test?retryWrites=true&w=majority";
+process.env.DB_URL;
 mongoose.connect(connStr, function(err) {
   if (err) throw err;
   console.log("Successfully connected to MongoDB");
@@ -120,18 +120,6 @@ router.post("/removeachievement", (req, res) => {
       .catch(err => res.json(err));
   });
 });
-
-// router.get("/studentprofilepicture", (req, res) => {
-//   if (!req.query.rollNo) {
-//     return res.status(400).json({ success: false, msg: "Bad request" });
-//   }
-//   profileSchema.findOne({ rollNo: req.query.rollNo }).then(data => {
-//     gfs.files.findOne({ _id: data.id }, (err, file) => {
-//       const readStream = gfs.createReadStream(file.filename);
-//       readStream.pipe(res);
-//     });
-//   });
-// });
 
 router.get("/studentprofiledetails", (req, res) => {
   if (!req.query.rollNo) {

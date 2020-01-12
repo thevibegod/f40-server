@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
- Schema=mongoose.Schema;
 var notificationSchema=new mongoose.Schema(
 {
   title :{

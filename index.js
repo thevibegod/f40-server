@@ -13,8 +13,16 @@ const menteeProfileRouter = require("./routes/menteeProfiles");
 const auth = require("./auth/auth");
 const app = express();
 const path = require('path');
+const PORT = process.env.PORT || '3000';
+const dotenv = require('dotenv')
+const result = dotenv.config()
 
+if (result.error) {
+  throw result.error
+}
 
+console.log(result.parsed)
+console.log(process.env)
 // const mailer = require('./mailer').initializeMailer;
 // const mailerObj = mailer();
 // const sendMail = require('./mailer').sendMail;
@@ -108,17 +116,4 @@ app.use(attendanceRouter);
 app.use(assessmentRouter);
 app.use(menteeProfileRouter);
 app.use(taskRouter);
-
-// app.get("/", function(req, res) {
-//   res.send("GET Login/Home page");
-// });
-//
-// app.post("/", function(req, res) {
-//   res.send("POST Login/Home page");
-// });
-
-// app.get("*", function(req, res) {
-//   res.send("Error 404.Page not found");
-// });
-
-app.listen(3000);
+app.listen(PORT);
