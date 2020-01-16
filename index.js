@@ -18,9 +18,7 @@ const dotenv = require('dotenv')
 const result = dotenv.config()
 const userSchema = require("./models/UserSchema");
 const adminRouter = require("./routes/adminProfiles")
-if (result.error) {
-  throw result.error
-}
+
 
 
 const mailer = require('./mailer').initializeMailer;
