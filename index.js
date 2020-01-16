@@ -25,12 +25,12 @@ const mailer = require('./mailer').initializeMailer;
 const mailerObj = mailer();
 const sendMail = require('./mailer').sendMail;
 
-// const options ={
-//   receiver:"contact.f40.ece@kct.ac.in",
-//   subject:"Hello world",
-//   message:"The server has begun to run."
-// }
-// sendMail(mailerObj,options);
+const options ={
+   receiver:"contact.f40.ece@kct.ac.in",
+   subject:"Hello world",
+   message:"The server has begun to run."
+ }
+ sendMail(mailerObj,options);
 
 var createTimeStamp = () => {
   dateObj = new Date();
