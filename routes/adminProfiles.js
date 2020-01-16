@@ -36,7 +36,7 @@ router.post("/removeadmin", (req, res) => {
     return res.status(400).json({ success: false, msg: "Bad Request." });
   }
   adminProfileSchema
-    .findOneAndDelete({ username: req.query.username })
+    .findOneAndDelete({ username: req.body.username })
     .then(data => {
       userSchema.findOneAndDelete({ username: req.body.username }).then(
         res.status(200).json({ success: true, msg: "Profile removed from db" })
