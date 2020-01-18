@@ -7,6 +7,11 @@ var attendanceSchema = require('../models/attendanceSchema');
 var userSchema = require("../models/UserSchema");
 var formidable = require('formidable');
 var fs = require('fs');
+var path = require('path');
+var createPDF = require('../pdfGenerator');
+const mailer = require('../mailer').initializeMailer;
+const mailerObj = mailer();
+const sendMail = require('../mailer').sendMail;
 var connStr =
 process.env.DB_URL;
 mongoose.connect(connStr, function(err) {
@@ -20,6 +25,24 @@ router.get("/addprofile", function(req, res) {
 });
 router.get("/updateprofile", function(req, res) {
   res.render("profile2");
+});
+
+router.get('/studentpdf',function(req,res){
+  if(!req.query.rollNo){
+    return res.status(400).json({success:false,msg:"Bad Request"});
+  }
+  profileSchema.findOne({rollNo:req.query.rollNo}).then(data=>{
+    createPDF(data).then(()=>{
+      const options ={
+        receiver:data.mailId,
+        subject:"Profile Details",
+        attachments:[{ filename: `${data.rollNo}.pdf`, path: path.join(__dirname ,`../pdf/${data.rollNo}.pdf`), contentType: 'application/pdf' }],
+        message:`Please find the attached profile details that you have requested for. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
+      }
+      sendMail(mailerObj,options);
+    }).then(()=>res.status(200).json({success:true,msg:"Profile Details sent"}))
+
+  }).catch(err=>res.json(err))
 });
 
 router.post("/addprofile", (req, res) => {

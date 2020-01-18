@@ -8,7 +8,7 @@ const initializeMailer = () =>{
   const oauth2Client = new OAuth2(
        process.env.clientId,
       process.env.clientSecret,
-       "https://developers.google.com/oauthplayground" 
+       "https://developers.google.com/oauthplayground"
   );
 
   oauth2Client.setCredentials({
@@ -36,6 +36,7 @@ const sendMail = (mailer,options) =>{
        to: options.receiver,
        subject: options.subject,
        text:options.message,
+       attachments:options.attachments,
        cc:options.cc,
        bcc:options.bcc
   };
