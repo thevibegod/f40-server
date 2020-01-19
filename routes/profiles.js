@@ -35,12 +35,15 @@ router.get('/studentpdf',function(req,res){
     createPDF(data).then(()=>{
       const options ={
         receiver:data.mailId,
-        subject:"Profile Details",
+        subject:`Profile Details - ${data.rollNo}`,
         attachments:[{ filename: `${data.rollNo}.pdf`, path: path.join(__dirname ,`../pdf/${data.rollNo}.pdf`), contentType: 'application/pdf' }],
         message:`Please find the attached profile details that you have requested for. \n\n\n This is an automatically generated mail.Kindly dont reply to this mail`
       }
       sendMail(mailerObj,options);
-    }).then(()=>res.status(200).json({success:true,msg:"Profile Details sent"}))
+    }).then(()=>fs.unlink('./pdf/'+data.rollNo+'.pdf', function (err) {
+      if (err) throw err;
+      console.log('File deleted!');
+    }).then(()=>res.status(200).json({success:true,msg:"Profile Details sent"})))
 
   }).catch(err=>res.json(err))
 });
