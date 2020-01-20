@@ -153,18 +153,12 @@ app.post('/otprequestadmin', (req, res) => {
       });
     } else {
       const OTP = auth.generateOTP(process.env.otpSecret);
-      userSchema.findOneAndDelete({
+      userSchema.findOneAndUpdate({
         username: req.body.username
-      }).then(user => {
-        new userSchema({
-          username: user.username,
-          password: user.password,
-          type: user.type,
-          otpData: {
-            OTP: OTP,
-            time: createTimeStamp()
-          }
-        }).save().then(() => {
+      },{otpData: {
+        OTP: OTP,
+        time: createTimeStamp()
+      }}).then(() => {
           const mailData = {
             receiver: pData.mailId,
             subject: "Password Reset",
@@ -176,7 +170,6 @@ app.post('/otprequestadmin', (req, res) => {
             msg: 'OTP generated'
           });
         })
-      })
     }
   })
 })
@@ -199,18 +192,12 @@ app.post('/otprequestmentor', (req, res) => {
       });
     } else {
       const OTP = auth.generateOTP(process.env.otpSecret);
-      userSchema.findOneAndDelete({
+      userSchema.findOneAndUpdate({
         username: req.body.username
-      }).then(user => {
-        new userSchema({
-          username: user.username,
-          password: user.password,
-          type: user.type,
-          otpData: {
-            OTP: OTP,
-            time: createTimeStamp()
-          }
-        }).save().then(() => {
+      },{otpData: {
+        OTP: OTP,
+        time: createTimeStamp()
+      }}).then(() => {
           const mailData = {
             receiver: pData.mailId,
             subject: "Password Reset",
@@ -222,7 +209,6 @@ app.post('/otprequestmentor', (req, res) => {
             msg: 'OTP generated'
           });
         })
-      })
     }
   })
 })
@@ -245,18 +231,12 @@ app.post('/otprequest', (req, res) => {
       });
     } else {
       const OTP = auth.generateOTP(process.env.otpSecret);
-      userSchema.findOneAndDelete({
+      userSchema.findOneAndUpdate({
         username: req.body.username
-      }).then(user => {
-        new userSchema({
-          username: user.username,
-          password: user.password,
-          type: user.type,
-          otpData: {
-            OTP: OTP,
-            time: createTimeStamp()
-          }
-        }).save().then(() => {
+      },{otpData: {
+        OTP: OTP,
+        time: createTimeStamp()
+      }}).then(() => {
           const mailData = {
             receiver: pData.mailId,
             subject: "Password Reset",
@@ -268,7 +248,6 @@ app.post('/otprequest', (req, res) => {
             msg: 'OTP generated'
           });
         })
-      })
     }
   })
 })
