@@ -18,7 +18,9 @@ const dotenv = require('dotenv')
 const result = dotenv.config()
 const userSchema = require("./models/UserSchema");
 const adminRouter = require("./routes/adminProfiles")
+const queue = require('./queue');
 
+queue();
 
 
 const mailer = require('./mailer').initializeMailer;
