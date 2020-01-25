@@ -28,7 +28,7 @@ const mailerObj = mailer();
 const sendMail = require('./mailer').sendMail;
 
 const options ={
-   receiver:"contact.f40.ece@kct.ac.in",
+   receiver:"contact.f40.ece@gmail.com",
    subject:"Hello world",
    message:"The server has begun to run."
  }
