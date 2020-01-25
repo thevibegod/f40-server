@@ -12,6 +12,7 @@ var createPDF = require('../pdfGenerator');
 const mailer = require('../mailer').initializeMailer;
 const mailerObj = mailer();
 const sendMail = require('../mailer').sendMail;
+const mv = require('mv');
 var connStr =
 process.env.DB_URL;
 mongoose.connect(connStr, function(err) {
@@ -189,7 +190,7 @@ router.post("/studentprofiledetailsupdation",(req, res) => {
         var oldpath = files.attachment.path;
         var ext = files.attachment.name.split('.')[1];
         var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
-        fs.rename(oldpath, newpath, function (err) {
+        mv(oldpath, newpath, function (err) {
           if (err) throw err;
         const newProfile = new profileSchema({
           name: fields.name,
