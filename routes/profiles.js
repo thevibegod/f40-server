@@ -20,14 +20,6 @@ mongoose.connect(connStr, function(err) {
   console.log("Successfully connected to MongoDB");
 });
 
-
-router.get("/addprofile", function(req, res) {
-  res.render("profile");
-});
-router.get("/updateprofile", function(req, res) {
-  res.render("profile2");
-});
-
 router.get('/studentpdf',function(req,res){
   if(!req.query.rollNo){
     return res.status(400).json({success:false,msg:"Bad Request"});
@@ -192,6 +184,7 @@ router.post("/studentprofiledetailsupdation",(req, res) => {
         var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
         mv(oldpath, newpath, function (err) {
           if (err) throw err;
+
         profileSchema.findOneAndUpdate({rollNo:fields.rollNo},{
           name: fields.name,
           mailId:fields.mailId,
