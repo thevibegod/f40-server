@@ -184,8 +184,15 @@ router.post("/studentprofiledetailsupdation",(req, res) => {
         var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
         mv(oldpath, newpath, function (err) {
           if (err) throw err;
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+>>>>>>> 3c3a73c90e4e5cb5f3e025e74bc077f6f0c6dc26
         profileSchema.findOneAndUpdate({rollNo:fields.rollNo},{
+=======
+        profileSchema.findOneAndUpdate({
+>>>>>>> 6c7600f85bbcf55b4fb6d19119b88bc9c79026aa
           name: fields.name,
           mailId:fields.mailId,
           id: newpath.slice(8),
