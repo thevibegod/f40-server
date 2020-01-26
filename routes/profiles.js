@@ -192,7 +192,7 @@ router.post("/studentprofiledetailsupdation",(req, res) => {
         var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
         mv(oldpath, newpath, function (err) {
           if (err) throw err;
-        const newProfile = new profileSchema({
+        profileSchema.findOneAndUpdate({
           name: fields.name,
           mailId:fields.mailId,
           id: newpath.slice(8),
@@ -205,7 +205,6 @@ router.post("/studentprofiledetailsupdation",(req, res) => {
           facultyMentorPhone: fields.facultyMentorPhone,
           rollNo: fields.rollNo
         });
-        newProfile.save();
       })
     })
       .then(() =>
