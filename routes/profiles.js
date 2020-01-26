@@ -196,7 +196,7 @@ router.post("/studentprofiledetailsupdation",(req, res) => {
           facultyMentorName: fields.facultyMentorName,
           facultyMentorMail: fields.facultyMentorMail,
           facultyMentorPhone: fields.facultyMentorPhone
-        },{new:true});
+        },{new:true}).then(data=>console.log(data));
         console.log('Updated')
       })
     })
