@@ -197,6 +197,7 @@ router.post("/studentprofiledetailsupdation",(req, res) => {
           facultyMentorMail: fields.facultyMentorMail,
           facultyMentorPhone: fields.facultyMentorPhone
         });
+        console.log('Updated')
       })
     })
       .then(() =>
