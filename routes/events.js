@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var formidable = require('formidable');
 var fs = require('fs')
-
+var mv = require("mv")
 var mongoose = require('mongoose')
 var eventSchema = require('../models/eventSchema')
 
@@ -13,20 +13,13 @@ mongoose.connect(connStr, function(err) {
   console.log("Successfully connected to MongoDB");
 });
 
-router.get('/addevent',function(req, res){
-  res.render('events')
-});
-router.get('/updateevent',function(req, res){
-  res.render('events2')
-});
-
 router.post('/addevent',(req, res)=>{
   var form = new formidable.IncomingForm();
   form.parse(req, function (err, fields, files) {
     var oldpath = files.attachment.path;
     var ext = files.attachment.name.split('.')[1];
     var newpath = './public/events/' + fields.title + 'ml' + Date.parse(new Date()) + '.' + ext ;
-    fs.rename(oldpath, newpath, function (err) {
+    mv(oldpath, newpath, function (err) {
       if (err) throw err;
       const newEvent = new eventSchema({title:fields.title,id:newpath.slice(8),desc:fields.desc})
       newEvent.save().then(()=>res.status(201).send('Added Event to db')).catch((err)=>res.json(err));
@@ -67,15 +60,14 @@ router.post('/addevent',(req, res)=>{
         var oldpath = files.attachment.path;
         var ext = files.attachment.name.split('.')[1];
         var newpath = './public/events/' + fields.title + 'ml' + Date.parse(new Date()) + '.' + ext ;
-        fs.rename(oldpath, newpath, function (err) {
+        mv(oldpath, newpath, function (err) {
           if (err) throw err;
-          eventSchema.findOneAndDelete({title:fields.title}).then(data=>{
+          eventSchema.findOne({title:fields.title}).then(data=>{
             fs.unlink('./public'+data.id, function (err) {
               if (err) throw err;
               console.log('File deleted!');
             });
-              const newEvent = new eventSchema({title:fields.title,id:newpath.slice(8),desc:fields.desc})
-              newEvent.save().then(()=>res.status(201).send('Updated Event in db')).catch((err)=>res.json(err))
+              eventSchema.findOneAndUpdate({title:fields.title},{title:fields.title,id:newpath.slice(8),desc:fields.desc},{new:true}).then(()=>res.status(201).send('Updated Event in db')).catch((err)=>res.json(err))
           });
         })
 

@@ -5,6 +5,7 @@ var mongoose = require("mongoose");
 var mentorProfileSchema = require("../models/mentorProfileSchema");
 var formidable = require('formidable');
 var fs = require('fs');
+var mv = require("mv");
 var connStr =
 process.env.DB_URL;
 mongoose.connect(connStr, function(err) {
@@ -17,7 +18,7 @@ router.post("/addmentorprofile", (req, res) => {
     var oldpath = files.attachment.path;
     var ext = files.attachment.name.split('.')[1];
     var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
-    fs.rename(oldpath, newpath, function (err) {
+    mv(oldpath, newpath, function (err) {
       if (err) throw err;
       new userSchema({username:fields.rollNo,password:fields.rollNo,type:fields.rollNo.startsWith('K')?'faculty-mentor':'student-mentor'}).save()
       .then(()=>{
@@ -128,7 +129,7 @@ router.post("/mentorprofiledetailsupdation",(req, res) => {
       return res.status(400).json({ success: false, msg: "Bad Request" });
     }
     mentorProfileSchema
-      .findOneAndDelete({ rollNo: fields.rollNo })
+      .findOne({ rollNo: fields.rollNo })
       .then(data => {
         fs.unlink('./public'+data.id, function (err) {
           if (err) throw err;
@@ -139,17 +140,16 @@ router.post("/mentorprofiledetailsupdation",(req, res) => {
         var oldpath = files.attachment.path;
         var ext = files.attachment.name.split('.')[1];
         var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
-        fs.rename(oldpath, newpath, function (err) {
+        mv(oldpath, newpath, function (err) {
           if (err) throw err;
-        const newProfile = new mentorProfileSchema({
+        mentorProfileSchema.findOneAndUpdate({rollNo:fields.rollNo},{
           name: fields.name,
           mailId:fields.mailId,
           id: newpath.slice(8),
           batch: fields.batch,
           rollNo: fields.rollNo,
           mentees:d.mentees
-        });
-        newProfile.save();
+        },{new:true}).then(data=>console.log(data))
       })
     }).then(() =>
       res.status(201).json({ success: true, msg: "Profile updated" })

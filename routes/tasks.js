@@ -4,6 +4,7 @@ var mongoose = require("mongoose");
 var router = require("express").Router();
 var formidable = require('formidable');
 var fs = require('fs');
+var mv = require("mv");
 var sortArray = require('../sort');
 const mailer = require('../mailer').initializeMailer;
 const mailerObj = mailer();
@@ -82,7 +83,7 @@ router.post('/uploadtask',(req,res)=>{
       var oldpath = files.attachment.path;
       var ext = files.attachment.name.split('.')[1];
       var newpath = './public/tasks/' + req.query.rollNo + 'ml' + Date.parse(new Date()) + '.' + ext ;
-      fs.rename(oldpath, newpath, function (err) {
+      mv(oldpath, newpath, function (err) {
         if (err) throw err;
         taskSchema.findOneAndDelete({_id:mongoose.Types.ObjectId(fields.taskId)}).then((data)=>{
           let obj = {feedback:fields.feedback,url:newpath.slice(8),timeStamp:createTimeStamp(),Score:null};

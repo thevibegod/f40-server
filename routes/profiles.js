@@ -203,7 +203,7 @@ router.post("/studentprofiledetailsupdation",(req, res) => {
       .then(() =>
         res.status(201).json({ success: true, msg: "Profile updated" })
       )
-      .catch(err => res.ststus(400).json({ success: false}));
+      .catch(err => res.status(400).json({ success: false}));
   })
     })
 module.exports = router;
