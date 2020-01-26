@@ -10,13 +10,6 @@ mongoose.connect(connStr, function(err) {
     console.log('Successfully connected to MongoDB');
 });
 
-router.get('/addcourse',function(req, res){
-  res.render('course1')
-});
-router.get('/updatecourse',function(req, res){
-  res.render('course2')
-});
-
 router.post('/addcourse',(req, res)=>{
   const newcourse = new courseSchema({title:req.body.title,desc:req.body.desc,
   price:req.body.price,financialaid:req.body.financialaid,link:req.body.link})
