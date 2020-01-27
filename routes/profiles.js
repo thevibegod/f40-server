@@ -44,7 +44,7 @@ router.post("/addprofile", (req, res) => {
     var oldpath = files.attachment.path;
     var ext = files.attachment.name.split('.')[1];
     var newpath = './public/profiles/' + fields.rollNo + '.' + ext ;
-    fs.rename(oldpath, newpath, function (err) {
+    mv(oldpath, newpath, function (err) {
       if (err) throw err;
       new userSchema({username:fields.rollNo,password:fields.rollNo,type:"student"}).save();
       const newProfile = new profileSchema({
